@@ -17,12 +17,12 @@ export default function runFixtureTests(
   parseFunction,
   onlyCompareErrors = false,
 ) {
-    console.log("IN HERE WITH: " + fixturePath);
+    // console.log("IN HERE WITH: " + fixturePath);
 
     const inputPath = join(fixturePath, "input.js");
     const input = readFileSync(inputPath, "utf-8").trimRight();
 
-    const options = [dirname(fixturePath), fixturePath]
+    const options = [dirname(dirname(fixturePath)), dirname(fixturePath), fixturePath]
       .map(path => readJSON(join(path, "options.json")))
       .reduce((lhs, rhs) => ({ ...lhs, ...rhs }), { });
 
