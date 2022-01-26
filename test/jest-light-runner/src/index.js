@@ -9,11 +9,12 @@ const piscina = new Piscina({
   filename: new URL("./worker-runner.js", import.meta.url).href,
   maxThreads: os.cpus().length / 2,
   env: {
-    // Workers don't have a tty; we whant them to inherit
+    // Workers don't have a tty; we want them to inherit
     // the color support level from the main thread.
     FORCE_COLOR: supportsColor.stdout.level,
-    ...process.env,
+    ...process.env
   },
+  execArgv: process.execArgv
 });
 
 export default class LightRunner {

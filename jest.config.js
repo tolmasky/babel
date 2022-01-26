@@ -1,22 +1,20 @@
 const supportsESM = parseInt(process.versions.node) >= 12;
 const isPublishBundle = process.env.IS_PUBLISH;
-
+console.log("HELLO");
 module.exports = {
   runner: supportsESM ? "./test/jest-light-runner" : "jest-runner",
-
-  collectCoverageFrom: [
-    "packages/*/src/**/*.{js,mjs,ts}",
-    "codemods/*/src/**/*.{js,mjs,ts}",
-    "eslint/*/src/**/*.{js,mjs,ts}",
-  ],
   // The eslint/* packages use ESLint v6, which has dropped support for Node v6.
   // TODO: Remove this process.version check in Babel 8.
-  testRegex: `./(packages|codemods${
+  testRegex: /* [`./(packages|codemods${
     Number(process.versions.node.split(".")[0]) < 10 ? "" : "|eslint"
-  })/[^/]+/test/.+\\.m?js$`,
+  })/[^/]+/test/.+\\.m?js$`.*/
+  //`(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$`,
+  //  `(/test/fixtures/.*|(\\.|/))\\.fixture/.*\\.[jt]sx?$`,
+  `/test/.*\\.fixture/input\\.[jt]sx?$`,
+//  ],
   testPathIgnorePatterns: [
     "/node_modules/",
-    "/test/fixtures/",
+    /* "/test/fixtures/",
     "/test/debug-fixtures/",
     "/babel-parser/test/expressions/",
     "/test/tmp/",
@@ -26,13 +24,14 @@ module.exports = {
     "<rootDir>/build/",
     "<rootDir>/.history/", // local directory for VSCode Extension - https://marketplace.visualstudio.com/items?itemName=xyz.local-history
     "_browser\\.js",
+    */
     // Some tests require internal files of bundled packages, which are not available
     // in production builds. They are marked using the .skip-bundled.js extension.
     ...(isPublishBundle ? ["\\.skip-bundled\\.js$"] : []),
   ],
   testEnvironment: "node",
   setupFilesAfterEnv: ["<rootDir>/test/testSetupFile.js"],
-  transformIgnorePatterns: [
+  /*transformIgnorePatterns: [
     "/node_modules/",
     "<rootDir>/packages/babel-standalone/babel(\\.min)?\\.js",
     "/test/(fixtures|tmp|__data__)/",
@@ -42,9 +41,9 @@ module.exports = {
     "/node_modules/",
     "<rootDir>/packages/babel-standalone/babel(\\.min)?\\.js",
     "/test/(fixtures|tmp|__data__)/",
-  ],
+  ],*/
   modulePathIgnorePatterns: [
-    "/test/fixtures/",
+    "/test/fixtures/.*/package.json$",
     "/test/tmp/",
     "/test/__data__/",
     "<rootDir>/build/",
