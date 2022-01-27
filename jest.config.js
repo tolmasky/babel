@@ -11,7 +11,7 @@ module.exports = {
   //`(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$`,
   //  `(/test/fixtures/.*|(\\.|/))\\.fixture/.*\\.[jt]sx?$`,
   [`/test/.*\\.fixture/input\\.[jt]sx?$`,
-  `/babel-parser/test/fixtures/([^\\.][^/]*/)*input\\.[jt]sx?$`],
+  `/babel-parser/test/fixtures/([^\\.][^/]*/){3}input\\.[jt]sx?$`],
   
   //`/babel-parser/test/fixtures/.*\\/input\\.[jt]sx?$`],
 //  ],
