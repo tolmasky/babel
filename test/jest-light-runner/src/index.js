@@ -14,7 +14,10 @@ const piscina = new Piscina({
     FORCE_COLOR: supportsColor.stdout.level,
     ...process.env
   },
-  execArgv: process.execArgv
+  execArgv: [
+    "--experimental-loader",
+    "./packages/babel-parser/test/helpers/fixture-loader.mjs"
+  ],
 });
 
 export default class LightRunner {
