@@ -20,9 +20,13 @@ export default function runFixtureTests(
     // console.log("IN HERE WITH: " + fixturePath);
     const fixturePath = dirname(inputPath);
 
-    const options = [dirname(dirname(fixturePath)), dirname(fixturePath), fixturePath]
-      .map(path => readJSON(join(path, "options.json")))
-      .reduce((lhs, rhs) => ({ ...lhs, ...rhs }), { });
+    const optionsChain = [dirname(dirname(fixturePath)), dirname(fixturePath), fixturePath]
+      .map(path => readJSON(join(path, "options.json")));
+      //.reduce((lhs, rhs) => ({ ...lhs, ...rhs }), { });
+
+    // Support legacy behavior: suite options "replace" root options, but test
+    // options combine with the result of that.
+    const options = { ...(optionsChain[1] || optionsChain[0]), ...optionsChain[2] };
 
     const disabled =
       //taskName[0] === "." ||
@@ -147,7 +151,7 @@ function readJSON(filename) {
   try {
     return JSONParse(readFileSync(filename, "utf-8"));
   } catch (error) {
-    return {};
+    return false;
   }
 }
 
