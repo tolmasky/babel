@@ -11,7 +11,9 @@ module.exports = {
   //`(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$`,
   //  `(/test/fixtures/.*|(\\.|/))\\.fixture/.*\\.[jt]sx?$`,
   [`/test/.*\\.fixture/input\\.[jt]sx?$`,
-  `/babel-parser/test/fixtures/.*\\/input\\.[jt]sx?$`],
+  `/babel-parser/test/fixtures/([^\\.][^/]*/)*input\\.[jt]sx?$`],
+  
+  //`/babel-parser/test/fixtures/.*\\/input\\.[jt]sx?$`],
 //  ],
   testPathIgnorePatterns: [
     "/node_modules/",

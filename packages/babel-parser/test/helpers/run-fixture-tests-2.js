@@ -8,26 +8,33 @@ import { serialize, deserialize } from "./serialization.js";
 import toContextualSyntaxError from "./to-contextual-syntax-error.js";
 import { parse } from "@babel/parser";
 
-const { OVERWRITE } = process.env;
+const { BABEL_8_BREAKING, CI, OVERWRITE, BABEL } = process.env;
 const { stringify, parse: JSONParse } = JSON;
 
 
 export default function runFixtureTests(
-  fixturePath,
+  inputPath,
   parseFunction,
   onlyCompareErrors = false,
 ) {
     // console.log("IN HERE WITH: " + fixturePath);
-
-    const inputPath = join(fixturePath, "input.js");
-    const input = readFileSync(inputPath, "utf-8").trimRight();
+    const fixturePath = dirname(inputPath);
 
     const options = [dirname(dirname(fixturePath)), dirname(fixturePath), fixturePath]
       .map(path => readJSON(join(path, "options.json")))
       .reduce((lhs, rhs) => ({ ...lhs, ...rhs }), { });
 
+    const disabled =
+      //taskName[0] === "." ||
+      (BABEL_8_BREAKING
+        ? options.BABEL_8_BREAKING === false
+        : options.BABEL_8_BREAKING === true);
+if (inputPath.indexOf("valid-trailing-comma-for-rest") > -1) {
+console.log("OPTIONS for " + inputPath, options);
+}
+    const input = readFileSync(inputPath, "utf-8").trimRight();
     const expectedPath = toExpectedPath(fixturePath);
-    const expectedContents = readFileSync(expectedPath, "utf-8");
+    const expectedContents = expectedPath && readFileSync(expectedPath, "utf-8");
     const expected = deserialize(expectedPath, options, expectedContents);
 
     if (expected.threw && expected.ast) {
@@ -36,7 +43,7 @@ export default function runFixtureTests(
       );
     }
 
-    const testFn = false ? it.skip : it;
+    const testFn = disabled ? it.skip : it;
     const toStartPosition = ({ startLine = 1, startColumn = 0 }) =>
     `(${startLine}, ${startColumn})`;
 
@@ -54,7 +61,11 @@ function toExpectedPath(fixturePath)
   const normalPath = join(fixturePath, "output.json");
   const extendedPath = join(fixturePath, "output.extended.json");
 
-  return existsSync(normalPath) ? normalPath : extendedPath;
+  return existsSync(normalPath)
+    ? normalPath
+    : existsSync(extendedPath)
+    ? extendedPath
+    : false;
 }
 
 const toJustErrors = result => ({

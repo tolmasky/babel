@@ -4,12 +4,8 @@ import { fileURLToPath } from "url";
 
 import runFixtureTests from "@babel/run-fixture-tests";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
-
-
-runFixtureTests(__dirname);
+runFixtureTests(fileURLToPath(import.meta.url));
 /*
 import { parse } from "@babel/parser";
 
