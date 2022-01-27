@@ -23,4 +23,4 @@ if [ -n "$TEST_ONLY" ]; then
   jestArgs+=("(packages|codemods|eslint)/.*$TEST_ONLY.*/test")
 fi
 
-$node "$(yarn bin jest)" "${jestArgs[@]}"
+$node --experimental-loader ./packages/babel-parser/test/helpers/fixture-loader.mjs "$(yarn bin jest)" "${jestArgs[@]}"

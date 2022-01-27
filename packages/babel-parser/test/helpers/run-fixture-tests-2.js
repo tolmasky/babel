@@ -10,6 +10,7 @@ import { parse } from "@babel/parser";
 
 const { BABEL_8_BREAKING, CI, OVERWRITE, BABEL } = process.env;
 const { stringify, parse: JSONParse } = JSON;
+const { hasOwnProperty } = Object;
 
 
 export default function runFixtureTests(
@@ -33,9 +34,7 @@ export default function runFixtureTests(
       (BABEL_8_BREAKING
         ? options.BABEL_8_BREAKING === false
         : options.BABEL_8_BREAKING === true);
-if (inputPath.indexOf("valid-trailing-comma-for-rest") > -1) {
-console.log("OPTIONS for " + inputPath, options);
-}
+
     const input = readFileSync(inputPath, "utf-8").trimRight();
     const expectedPath = toExpectedPath(fixturePath);
     const expectedContents = expectedPath && readFileSync(expectedPath, "utf-8");
@@ -58,6 +57,12 @@ console.log("OPTIONS for " + inputPath, options);
       testFn(`start = ${toStartPosition(options)}`,
         () => runParseTest(parse, test, adjust, options));
     }
+}
+
+const fsMemoized = function (f) {
+  const cache = Object.create(null);
+
+  return path => (hasOwnProperty.call(cache, path) ? cache[path] : (cache[path] = f(path)));
 }
 
 function toExpectedPath(fixturePath)
@@ -147,13 +152,13 @@ function runParseTest(parse, test, adjust, options) {
   }
 }
 
-function readJSON(filename) {
+const readJSON = fsMemoized(function (filename) {
   try {
     return JSONParse(readFileSync(filename, "utf-8"));
   } catch (error) {
     return false;
   }
-}
+});
 
 function parseWithRecovery(parse, source, filename, options) {
   try {
