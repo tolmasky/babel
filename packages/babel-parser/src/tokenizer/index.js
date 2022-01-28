@@ -320,6 +320,7 @@ export default class Tokenizer extends ParserErrors {
     if (!this.isLookahead) startLoc = this.state.curPosition();
     const start = this.state.pos;
     const end = this.input.indexOf("*/", start + 2);
+
     if (end === -1) {
       // We have to call this again here because startLoc may not be set...
       // This seems to be for performance reasons:
@@ -1057,16 +1058,20 @@ export default class Tokenizer extends ParserErrors {
     let { pos } = this.state;
     for (; ; ++pos) {
       if (pos >= this.length) {
-        // FIXME: explain
-        throw this.raise(Errors.UnterminatedRegExp, {
+        // We don't have to worry about this being on a different line, since
+        // we break out of this loop on newlines.
+        this.raise(Errors.UnterminatedRegExp, {
           at: createPositionWithColumnOffset(startLoc, 1),
         });
+        break;
       }
       const ch = this.input.charCodeAt(pos);
       if (isNewLine(ch)) {
-        throw this.raise(Errors.UnterminatedRegExp, {
+        // FIXME: This might be the wrong line...
+        this.raise(Errors.UnterminatedRegExp, {
           at: createPositionWithColumnOffset(startLoc, 1),
         });
+        break;
       }
       if (escaped) {
         escaped = false;
@@ -1390,41 +1395,53 @@ export default class Tokenizer extends ParserErrors {
   }
 
   readString(quote: number): void {
-    let out = "",
-      chunkStart = ++this.state.pos;
+    let out = "";
+    let chunkStart = ++this.state.pos;
+    let isUnterminated = false;
     for (;;) {
       if (this.state.pos >= this.length) {
-        throw this.raise(Errors.UnterminatedString, {
-          at: this.state.startLoc,
-        });
+        isUnterminated = true;
+        this.raise(Errors.UnterminatedString, { at: this.state.startLoc });
+        break;
       }
       const ch = this.input.charCodeAt(this.state.pos);
       if (ch === quote) break;
+
+      // For the sake of error recovery, essentially try to pretend there was an
+      // end quote right before this newline. We simulate this by breaking and
+      // moving pos backwards by one so that so that the pos++ below sees the
+      // newline (and so we can later correctly advance curLine, etc.).
+      if (isNewLine(ch)) {
+        isUnterminated = true;
+        this.raise(Errors.UnterminatedString, { at: this.state.startLoc });
+        break;
+      }
+
       if (ch === charCodes.backslash) {
         out += this.input.slice(chunkStart, this.state.pos);
         // $FlowFixMe
         out += this.readEscapedChar(false);
         chunkStart = this.state.pos;
-      } else if (
-        ch === charCodes.lineSeparator ||
-        ch === charCodes.paragraphSeparator
-      ) {
-        ++this.state.pos;
-        ++this.state.curLine;
-        this.state.lineStart = this.state.pos;
-      } else if (isNewLine(ch)) {
-        throw this.raise(Errors.UnterminatedString, {
-          at: this.state.startLoc,
-        });
       } else {
         ++this.state.pos;
+        
+        if (
+          ch === charCodes.lineSeparator ||
+          ch === charCodes.paragraphSeparator
+        ) {
+          ++this.state.curLine;
+          this.state.lineStart = this.state.pos;
+        }
       }
     }
-    out += this.input.slice(chunkStart, this.state.pos++);
+    out += this.input.slice(chunkStart, this.state.pos);
+
+    if (!isUnterminated) ++this.state.pos;
+
     this.finishToken(tt.string, out);
   }
 
-  // Reads tempalte continuation `}...`
+  // Reads template continuation `}...`
   readTemplateContinuation(): void {
     if (!this.match(tt.braceR)) {
       this.unexpected(null, tt.braceR);
