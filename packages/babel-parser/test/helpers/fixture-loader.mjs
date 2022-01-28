@@ -9,6 +9,7 @@ const isFixture = specifier =>
     FixtureRegExp.test(specifier);
 
 export async function resolve(specifier, context, next) {
+    //console.log("requiring " + specifier);
   //console.log("resolving for: " + specifier);
   if (specifier === "@babel/run-fixture-tests") {
   //    console.log("HERE!!!");

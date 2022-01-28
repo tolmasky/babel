@@ -23,4 +23,4 @@ if [ -n "$TEST_ONLY" ]; then
   jestArgs+=("(packages|codemods|eslint)/.*$TEST_ONLY.*/test")
 fi
 
-$node "$(yarn bin jest)" "${jestArgs[@]}"
+$node "$(yarn bin jest)" "${jestArgs[@]}" --ci
