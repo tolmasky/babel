@@ -1,4 +1,3 @@
-// @flow
 import { types as tc, type TokContext } from "./context";
 // ## Token types
 
@@ -30,26 +29,26 @@ const prefix = true;
 const postfix = true;
 
 type TokenOptions = {
-  keyword?: string,
-  beforeExpr?: boolean,
-  startsExpr?: boolean,
-  rightAssociative?: boolean,
-  isLoop?: boolean,
-  isAssign?: boolean,
-  prefix?: boolean,
-  postfix?: boolean,
-  binop?: ?number,
+  keyword?: string;
+  beforeExpr?: boolean;
+  startsExpr?: boolean;
+  rightAssociative?: boolean;
+  isLoop?: boolean;
+  isAssign?: boolean;
+  prefix?: boolean;
+  postfix?: boolean;
+  binop?: number | null | undefined;
 };
 
 // Internally the tokenizer stores token as a number
-export opaque type TokenType = number;
+export type TokenType = number;
 
 // The `ExportedTokenType` is exported via `tokTypes` and accessible
 // when `tokens: true` is enabled. Unlike internal token type, it provides
 // metadata of the tokens.
 export class ExportedTokenType {
   label: string;
-  keyword: ?string;
+  keyword: string | null | undefined;
   beforeExpr: boolean;
   startsExpr: boolean;
   rightAssociative: boolean;
@@ -57,9 +56,9 @@ export class ExportedTokenType {
   isAssign: boolean;
   prefix: boolean;
   postfix: boolean;
-  binop: ?number;
+  binop: number | null | undefined;
   // todo(Babel 8): remove updateContext from exposed token layout
-  declare updateContext: ?(context: Array<TokContext>) => void;
+  declare updateContext: ((context: TokContext[]) => void) | null | undefined;
 
   constructor(label: string, conf: TokenOptions = {}) {
     this.label = label;

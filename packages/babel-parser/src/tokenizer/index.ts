@@ -1,5 +1,3 @@
-// @flow
-
 /*:: declare var invariant; */
 
 import type { Options } from "../options";
@@ -11,11 +9,12 @@ import {
   tokenIsKeyword,
   tokenLabelName,
   tt,
-  keywords as keywordTypes,
-  type TokenType,
+  keywords as keywordTypes
 } from "./types";
-import { type TokContext } from "./context";
-import ParserErrors, { Errors, type ErrorTemplate } from "../parser/error";
+import type { TokenType } from "./types";
+import type { TokContext } from "./context";
+import ParserErrors, { Errors,  } from "../parser/error";
+import type { ErrorTemplate } from "../parser/error";
 import { SourceLocation } from "../util/location";
 import {
   lineBreakG,
@@ -60,55 +59,59 @@ const forbiddenNumericSeparatorSiblings = {
   ],
 };
 
-const allowedNumericSeparatorSiblings = {};
-allowedNumericSeparatorSiblings.bin = [
-  // 0 - 1
-  charCodes.digit0,
-  charCodes.digit1,
-];
-allowedNumericSeparatorSiblings.oct = [
-  // 0 - 7
-  ...allowedNumericSeparatorSiblings.bin,
+// FIXME: Make this a map instead? .indexOf can't be good...
+const allowedNumericSeparatorSiblings = ((
+  bin = [
+    // 0 - 1
+    charCodes.digit0,
+    charCodes.digit1,
+  ],
+  oct = [
+    // 0 - 7
+    charCodes.digit2,
+    charCodes.digit3,
+    charCodes.digit4,
+    charCodes.digit5,
+    charCodes.digit6,
+    charCodes.digit7,
+  ],
+  dec = [
+    charCodes.digit8,
+    charCodes.digit9,
+  ],
+  hex = [
+    charCodes.uppercaseA,
+    charCodes.uppercaseB,
+    charCodes.uppercaseC,
+    charCodes.uppercaseD,
+    charCodes.uppercaseE,
+    charCodes.uppercaseF,
 
-  charCodes.digit2,
-  charCodes.digit3,
-  charCodes.digit4,
-  charCodes.digit5,
-  charCodes.digit6,
-  charCodes.digit7,
-];
-allowedNumericSeparatorSiblings.dec = [
-  // 0 - 9
-  ...allowedNumericSeparatorSiblings.oct,
-
-  charCodes.digit8,
-  charCodes.digit9,
-];
-
-allowedNumericSeparatorSiblings.hex = [
-  // 0 - 9, A - F, a - f,
-  ...allowedNumericSeparatorSiblings.dec,
-
-  charCodes.uppercaseA,
-  charCodes.uppercaseB,
-  charCodes.uppercaseC,
-  charCodes.uppercaseD,
-  charCodes.uppercaseE,
-  charCodes.uppercaseF,
-
-  charCodes.lowercaseA,
-  charCodes.lowercaseB,
-  charCodes.lowercaseC,
-  charCodes.lowercaseD,
-  charCodes.lowercaseE,
-  charCodes.lowercaseF,
-];
+    charCodes.lowercaseA,
+    charCodes.lowercaseB,
+    charCodes.lowercaseC,
+    charCodes.lowercaseD,
+    charCodes.lowercaseE,
+    charCodes.lowercaseF,
+ ]) =>
+({
+  bin,
+  oct: [...bin, ...oct],
+  dec: [...bin, ...oct, ...dec],
+  hex: [...bin, ...oct, ...dec, ...hex]
+}))();
 
 // Object type used to represent tokens. Note that normally, tokens
 // simply exist as properties on the parser object. This is only
 // used for the onToken callback and the external tokenizer.
 
 export class Token {
+  type: TokenType;
+  value: any;
+  start: number;
+  end: number;
+  loc: SourceLocation;
+
   constructor(state: State) {
     this.type = state.type;
     this.value = state.value;
@@ -116,29 +119,19 @@ export class Token {
     this.end = state.end;
     this.loc = new SourceLocation(state.startLoc, state.endLoc);
   }
-
-  declare type: TokenType;
-  declare value: any;
-  declare start: number;
-  declare end: number;
-  declare loc: SourceLocation;
 }
 
 // ## Tokenizer
 
-export default class Tokenizer extends ParserErrors {
-  // Forward-declarations
-  // parser/util.js
-  /*::
-  +hasPrecedingLineBreak: () => boolean;
-  +unexpected: (loc?: ?Position, type?: TokenType) => empty;
-  +expectPlugin: (name: string, loc?: Position) => true;
+export default abstract class Tokenizer extends ParserErrors {
+
+  abstract hasPrecedingLineBreak: () => boolean;
+  abstract expectPlugin: (name: string, loc?: Position) => true;
+  /*+unexpected: (loc?: ?Position, type?: TokenType) => empty;
   */
 
-  isLookahead: boolean;
-
   // Token store.
-  tokens: Array<Token | N.Comment> = [];
+  tokens: (Token | N.Comment)[] = [];
 
   constructor(options: Options, input: string) {
     super();
@@ -494,7 +487,7 @@ export default class Tokenizer extends ParserErrors {
   // the token, so that the next one's `start` will point at the
   // right position.
 
-  finishToken(type: TokenType, val: any): void {
+  finishToken(type: TokenType, val?: any): void {
     this.state.end = this.state.pos;
     this.state.endLoc = this.state.curPosition();
     const prevType = this.state.type;
@@ -1467,8 +1460,11 @@ export default class Tokenizer extends ParserErrors {
     out += this.input.slice(chunkStart, this.state.pos++);
     this.finishToken(tt.string, out);
   }
+  
+  unexpected(loc?: Position | null, type?: TokenType): void {
+  }
 
-  // Reads tempalte continuation `}...`
+  // Reads template continuation `}...`
   readTemplateContinuation(): void {
     if (!this.match(tt.braceR)) {
       this.unexpected(null, tt.braceR);
@@ -1670,7 +1666,7 @@ export default class Tokenizer extends ParserErrors {
   // When `firstCode` is given, it assumes it is always an identifier start and
   // will skip reading start position again
 
-  readWord1(firstCode: number | void): string {
+  readWord1(firstCode?: number): string {
     this.state.containsEsc = false;
     let word = "";
     const start = this.state.pos;
@@ -1719,7 +1715,7 @@ export default class Tokenizer extends ParserErrors {
   // Read an identifier or keyword token. Will check for reserved
   // words when necessary.
 
-  readWord(firstCode: number | void): void {
+  readWord(firstCode?: number) : void {
     const word = this.readWord1(firstCode);
     const type = keywordTypes.get(word);
     if (type !== undefined) {
@@ -1743,6 +1739,6 @@ export default class Tokenizer extends ParserErrors {
   }
 
   // updateContext is used by the jsx plugin
-  // eslint-disable-next-line no-unused-vars
-  updateContext(prevType: TokenType): void {}
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+  updateContext(prevType?: TokenType): void {}
 }

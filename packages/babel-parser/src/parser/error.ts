@@ -1,9 +1,9 @@
-// @flow
 /* eslint sort-keys: "error" */
-import { type Position } from "../util/location";
+import type { Position } from "../util/location";
 import CommentsParser from "./comments";
-import { type ErrorCode, ErrorCodes } from "./error-codes";
-import { type Node } from "../types";
+import type { ErrorCode } from "./error-codes";
+import { ErrorCodes } from "./error-codes";
+import type { Node } from "../types";
 
 // This function is used to raise exceptions on parse errors. It
 // takes an offset integer (into the current `input`) to indicate
@@ -12,24 +12,24 @@ import { type Node } from "../types";
 // message.
 
 type ErrorContext = {
-  pos: number,
-  loc: Position,
-  missingPlugin?: Array<string>,
-  code?: string,
-  reasonCode?: String,
+  pos: number;
+  loc: Position;
+  missingPlugin?: string[];
+  code?: string;
+  reasonCode?: string;
 };
 export type ParsingError = SyntaxError & ErrorContext;
 
 export type ErrorTemplate = {
-  code: ErrorCode,
-  template: string,
-  reasonCode: string,
+  code: ErrorCode;
+  template: string;
+  reasonCode: string;
 };
 export type ErrorTemplates = {
   [key: string]: ErrorTemplate,
 };
 
-type Origin = {| node: Node |} | {| at: Position |};
+type Origin = { node: Node } | { at: Position };
 
 type SyntaxPlugin =
   | "flow"
@@ -73,7 +73,7 @@ export {
 } from "./error-message";
 
 export type raiseFunction = (ErrorTemplate, Origin, ...any) => void;
-export type ErrorData = {| message: ErrorTemplate, loc: Position |};
+export type ErrorData = { message: ErrorTemplate, loc: Position };
 
 export default class ParserError extends CommentsParser {
   // Forward-declaration: defined in tokenizer/index.js
@@ -81,13 +81,15 @@ export default class ParserError extends CommentsParser {
   +isLookahead: boolean;
   */
 
+  isLookahead: boolean;
+
   raise(
     { code, reasonCode, template }: ErrorTemplate,
     origin: Origin,
     ...params: any
-  ): Error | empty {
+  ): Error | never {
     return this.raiseWithData(
-      origin.node ? origin.node.loc.start : origin.at,
+      "node" in origin ? origin.node.loc.start : origin.at,
       { code, reasonCode },
       template,
       ...params,
@@ -103,14 +105,14 @@ export default class ParserError extends CommentsParser {
    * @param {number} pos
    * @param {string} errorTemplate
    * @param {...any} params
-   * @returns {(Error | empty)}
+   * @returns {(Error | never)}
    * @memberof ParserError
    */
   raiseOverwrite(
     loc: Position,
     { code, template }: ErrorTemplate,
     ...params: any
-  ): Error | empty {
+  ): Error | never {
     const pos = loc.index;
     const message =
       template.replace(/%(\d+)/g, (_, i: number) => params[i]) +
@@ -131,21 +133,21 @@ export default class ParserError extends CommentsParser {
 
   raiseWithData(
     loc: Position,
-    data?: {
-      missingPlugin?: Array<string>,
+    data: {
+      missingPlugin?: string[],
       code?: string,
-    },
+    } | null | undefined,
     errorTemplate: string,
     ...params: any
-  ): Error | empty {
+  ): Error | never {
     const pos = loc.index;
     const message =
       errorTemplate.replace(/%(\d+)/g, (_, i: number) => params[i]) +
       ` (${loc.line}:${loc.column})`;
-    return this._raise(Object.assign(({ loc, pos }: Object), data), message);
+    return this._raise(Object.assign(({ loc, pos } as any), data), message);
   }
 
-  _raise(errorContext: ErrorContext, message: string): Error | empty {
+  _raise(errorContext: ErrorContext, message: string): Error | never {
     // $FlowIgnore
     const err: SyntaxError & ErrorContext = new SyntaxError(message);
     Object.assign(err, errorContext);
