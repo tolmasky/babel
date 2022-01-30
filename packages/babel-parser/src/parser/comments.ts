@@ -1,5 +1,3 @@
-// @flow
-
 /*:: declare var invariant; */
 
 import BaseParser from "./base";
@@ -19,12 +17,12 @@ import * as charCodes from "charcodes";
  *                                         with minimal size (|end - start|)
  */
 export type CommentWhitespace = {
-  start: number,
-  end: number,
-  comments: Array<Comment>,
-  leadingNode: Node | null,
-  trailingNode: Node | null,
-  containingNode: Node | null,
+  start: number;
+  end: number;
+  comments: Comment[];
+  leadingNode: Node | null;
+  trailingNode: Node | null;
+  containingNode: Node | null;
 };
 
 /**
@@ -35,7 +33,7 @@ export type CommentWhitespace = {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-function setTrailingComments(node: Node, comments: Array<Comment>) {
+function setTrailingComments(node: Node, comments: Comment[]) {
   if (node.trailingComments === undefined) {
     node.trailingComments = comments;
   } else {
@@ -51,7 +49,7 @@ function setTrailingComments(node: Node, comments: Array<Comment>) {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-function setLeadingComments(node: Node, comments: Array<Comment>) {
+function setLeadingComments(node: Node, comments: Comment[]) {
   if (node.leadingComments === undefined) {
     node.leadingComments = comments;
   } else {
@@ -67,7 +65,7 @@ function setLeadingComments(node: Node, comments: Array<Comment>) {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-export function setInnerComments(node: Node, comments: Array<Comment>) {
+export function setInnerComments(node: Node, comments: Comment[]) {
   if (node.innerComments === undefined) {
     node.innerComments = comments;
   } else {
@@ -86,7 +84,7 @@ export function setInnerComments(node: Node, comments: Array<Comment>) {
  */
 function adjustInnerComments(
   node: Node,
-  elements: Array<Node>,
+  elements: Node[],
   commentWS: CommentWhitespace,
 ) {
   let lastElement = null;

@@ -5,4 +5,4 @@ export const ErrorCodes = Object.freeze({
   SourceTypeModuleError: "BABEL_PARSER_SOURCETYPE_MODULE_REQUIRED",
 });
 
-export type ErrorCode = $Values<typeof ErrorCodes>;
+export type ErrorCode = typeof ErrorCodes[keyof typeof ErrorCodes];
