@@ -1,12 +1,13 @@
-// @flow
-
 import {
   CLASS_ELEMENT_KIND_ACCESSOR,
   CLASS_ELEMENT_FLAG_STATIC,
-  type ClassElementTypes,
 } from "./scopeflags";
+import type { ClassElementTypes } from "./scopeflags";
+
 import { Position } from "./location";
-import { Errors, type raiseFunction } from "../parser/error";
+import { Errors } from "../parser/error";
+
+import type { raiseFunction } from "../parser/error";
 
 export class ClassScope {
   // A list of private named declared in the current class
@@ -21,7 +22,7 @@ export class ClassScope {
 }
 
 export default class ClassScopeHandler {
-  stack: Array<ClassScope> = [];
+  stack: ClassScope[] = [];
   declare raise: raiseFunction;
   undefinedPrivateNames: Map<string, Position> = new Map();
 

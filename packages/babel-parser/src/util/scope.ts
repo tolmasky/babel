@@ -13,12 +13,14 @@ import {
   BIND_SCOPE_VAR,
   BIND_SCOPE_LEXICAL,
   BIND_KIND_VALUE,
-  type ScopeFlags,
-  type BindingTypes,
 } from "./scopeflags";
+
+import type { ScopeFlags, BindingTypes } from "./scopeflags";
 import { Position } from "./location";
 import * as N from "../types";
-import { Errors, type raiseFunction } from "../parser/error";
+import { Errors } from "../parser/error";
+
+import type { raiseFunction } from "../parser/error";
 
 // Start an AST node, attaching a start offset.
 export class Scope {
@@ -37,13 +39,15 @@ export class Scope {
 
 // The functions in this module keep track of declared variables in the
 // current scope in order to detect duplicate variable names.
-export default class ScopeHandler<IScope: Scope = Scope> {
-  scopeStack: Array<IScope> = [];
+export default class ScopeHandler<IScope extends Scope> {
+  ScopeConstructor: { new (ScopeFlags): IScope };
+  scopeStack: IScope[] = [];
   declare raise: raiseFunction;
   declare inModule: boolean;
   undefinedExports: Map<string, Position> = new Map();
 
-  constructor(raise: raiseFunction, inModule: boolean) {
+  constructor(ScopeConstructor: { new (ScopeFlags): IScope }, raise: raiseFunction, inModule: boolean) {
+    this.ScopeConstructor = ScopeConstructor;
     this.raise = raise;
     this.inModule = inModule;
   }
@@ -83,8 +87,8 @@ export default class ScopeHandler<IScope: Scope = Scope> {
     return this.treatFunctionsAsVarInScope(this.currentScope());
   }
 
-  createScope(flags: ScopeFlags): Scope {
-    return new Scope(flags);
+  createScope(flags: ScopeFlags): IScope {
+    return new this.ScopeConstructor(flags);
   }
   // This method will be overwritten by subclasses
   /*:: +createScope: (flags: ScopeFlags) => IScope; */
@@ -204,7 +208,6 @@ export default class ScopeHandler<IScope: Scope = Scope> {
     return this.scopeStack[this.scopeStack.length - 1];
   }
 
-  // $FlowIgnore
   currentVarScopeFlags(): ScopeFlags {
     for (let i = this.scopeStack.length - 1; ; i--) {
       const { flags } = this.scopeStack[i];
@@ -215,7 +218,6 @@ export default class ScopeHandler<IScope: Scope = Scope> {
   }
 
   // Could be useful for `arguments`, `this`, `new.target`, `super()`, `super.property`, and `super[property]`.
-  // $FlowIgnore
   currentThisScopeFlags(): ScopeFlags {
     for (let i = this.scopeStack.length - 1; ; i--) {
       const { flags } = this.scopeStack[i];

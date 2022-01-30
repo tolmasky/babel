@@ -1,5 +1,3 @@
-// @flow
-
 // Each scope gets a bitset that may contain these flags
 // prettier-ignore
 export const SCOPE_OTHER        = 0b000000000,
