@@ -1,5 +1,3 @@
-// @flow
-
 import type { PluginList } from "./plugin-utils";
 
 // A second optional argument can be given to further configure
@@ -8,7 +6,7 @@ import type { PluginList } from "./plugin-utils";
 export type SourceType = "script" | "module" | "unambiguous";
 
 
-export type Options {
+export type Options = {
   /**
    * By default, import and export declarations can only appear at a program's top level.
    * Setting this option to true allows them anywhere where a statement is allowed.
@@ -76,9 +74,16 @@ export type Options {
   startLine?: number;
 
   /**
+   * By default, the first column of code parsed is treated as column 0.
+   * You can provide a column number to alternatively start with.
+   * Useful for integration with other source tools.
+   */
+  startColumn?: number;
+
+  /**
    * Array containing the plugins that you want to enable.
    */
-  plugins?: ParserPlugin[];
+  plugins?: PluginList;
 
   /**
    * Should the parser work in strict mode.
@@ -159,7 +164,7 @@ export const defaultOptions: Options = {
 
 // Interpret and default an options object
 
-export function getOptions(opts: ?Options): Options {
+export function getOptions(opts: Options | null | undefined): Options {
   const options: any = {};
   for (const key of Object.keys(defaultOptions)) {
     options[key] = opts && opts[key] != null ? opts[key] : defaultOptions[key];
