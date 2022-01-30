@@ -1,5 +1,3 @@
-// @flow
-
 export type Pos = {
   start: number,
 };
@@ -23,7 +21,7 @@ export class SourceLocation {
   start: Position;
   end: Position;
   filename: string;
-  identifierName: ?string;
+  identifierName: string | null | undefined;
 
   constructor(start: Position, end?: Position) {
     this.start = start;
