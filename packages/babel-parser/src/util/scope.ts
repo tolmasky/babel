@@ -18,9 +18,9 @@ import {
 import type { ScopeFlags, BindingTypes } from "./scopeflags";
 import { Position } from "./location";
 import * as N from "../types";
-import { Errors } from "../parser/error";
+import Errors from "../parser/errors";
+import Tokenizer from "../tokenizer";
 
-import type { raiseFunction } from "../parser/error";
 
 // Start an AST node, attaching a start offset.
 export class Scope {
@@ -40,15 +40,15 @@ export class Scope {
 // The functions in this module keep track of declared variables in the
 // current scope in order to detect duplicate variable names.
 export default class ScopeHandler<IScope extends Scope> {
+  parser: Tokenizer;
   ScopeConstructor: { new (ScopeFlags): IScope };
   scopeStack: IScope[] = [];
-  declare raise: raiseFunction;
-  declare inModule: boolean;
+  inModule: boolean;
   undefinedExports: Map<string, Position> = new Map();
 
-  constructor(ScopeConstructor: { new (ScopeFlags): IScope }, raise: raiseFunction, inModule: boolean) {
+  constructor(ScopeConstructor: { new (ScopeFlags): IScope }, parser: Tokenizer, inModule: boolean) {
     this.ScopeConstructor = ScopeConstructor;
-    this.raise = raise;
+    this.parser = parser;
     this.inModule = inModule;
   }
 
@@ -153,7 +153,7 @@ export default class ScopeHandler<IScope extends Scope> {
     loc: Position,
   ) {
     if (this.isRedeclaredInScope(scope, name, bindingType)) {
-      this.raise(Errors.VarRedeclaration, { at: loc }, name);
+      this.parser.raise(Errors.VarRedeclaration, { name, at: loc });
     }
   }
 

@@ -7,7 +7,7 @@ import { types as ct } from "./context";
 import type { TokContext } from "./context";
 import { tt } from "./types";
 import type { TokenType } from "./types";
-import type { ErrorData, ParsingError } from "../parser/error";
+import type { ParsingError } from "../parser/error";
 
 type TopicContextState = {
   // When a topic binding has been currently established,
@@ -123,7 +123,7 @@ export default class State {
 
   // The context stack is used to track whether the apostrophe "`" starts
   // or ends a string template
-  context: Array<TokContext> = [ct.brace];
+  context: TokContext[] = [ct.brace];
   // Used to track whether a JSX element is allowed to form
   canStartJSXElement: boolean = true;
 
@@ -140,7 +140,7 @@ export default class State {
 
   // todo(JLHwung): set strictErrors to null and avoid recording string errors
   // after a non-directive is parsed
-  strictErrors: Map<number, ErrorData> = new Map();
+  strictErrors: Map<number, ParsingError> = new Map();
 
   // Tokens length in token store
   tokensLength: number = 0;
@@ -175,6 +175,12 @@ export type LookaheadState = {
   type: TokenType;
   start: number;
   end: number;
+  context: TokContext[];
   /* Used only in readToken_mult_modulo */
   inType: boolean;
+  startLoc: Position;
+  lastTokEndLoc: Position;
+  curLine: number;
+  lineStart: number;
+  curPosition: () => Position;
 };

@@ -1,161 +1,53 @@
 /* eslint sort-keys: "error" */
 import type { Position } from "../util/location";
-import CommentsParser from "./comments";
 import type { ErrorCode } from "./error-codes";
 import { ErrorCodes } from "./error-codes";
-import type { Node } from "../types";
+import type { NodeBase } from "../types";
 
-// This function is used to raise exceptions on parse errors. It
-// takes an offset integer (into the current `input`) to indicate
-// the location of the error, attaches the position to the end
-// of the error message, and then raises a `SyntaxError` with that
-// message.
 
-type ErrorContext = {
-  pos: number;
+type ToMessage = (self: any) => string;
+
+export type ParsingErrorClass = {
+  toMessage: ToMessage;
+  new(...args: any[]): ParsingError;
+};
+
+export type ParsingError = {
   loc: Position;
-  missingPlugin?: string[];
-  code?: string;
-  reasonCode?: string;
-};
-export type ParsingError = SyntaxError & ErrorContext;
-
-export type ErrorTemplate = {
-  code: ErrorCode;
-  template: string;
+  pos: number;
+//  missingPlugin?: string[];
+  code: string;
   reasonCode: string;
-};
-export type ErrorTemplates = {
-  [key: string]: ErrorTemplate,
-};
-
-type Origin = { node: Node } | { at: Position };
-
-type SyntaxPlugin =
-  | "flow"
-  | "typescript"
-  | "jsx"
-  | "placeholders"
-  | typeof undefined;
-
-function keepReasonCodeCompat(reasonCode: string, syntaxPlugin: SyntaxPlugin) {
-  if (!process.env.BABEL_8_BREAKING) {
-    // For consistency in TypeScript and Flow error codes
-    if (syntaxPlugin === "flow" && reasonCode === "PatternIsOptional") {
-      return "OptionalBindingPattern";
-    }
-  }
-  return reasonCode;
 }
 
-export function makeErrorTemplates(
-  messages: {
-    [key: string]: string,
-  },
-  code: ErrorCode,
-  syntaxPlugin?: SyntaxPlugin,
-): ErrorTemplates {
-  const templates: ErrorTemplates = {};
-  Object.keys(messages).forEach(reasonCode => {
-    templates[reasonCode] = Object.freeze({
-      code,
-      reasonCode: keepReasonCodeCompat(reasonCode, syntaxPlugin),
-      template: messages[reasonCode],
-    });
-  });
-  return Object.freeze(templates);
+export type ParsingErrorProperties<T extends ToMessage> = { loc: Position } & Parameters<T>[0];
+
+
+const toParsingErrorClass = <T extends ToMessage>([key, toMessage] : [string, T]) =>
+  class extends SyntaxError {
+    loc: Position;
+    pos: number;
+    code: string = ErrorCodes.SyntaxError;
+    reasonCode: string = key;
+    static toMessage = toMessage;
+
+    constructor({ loc, ...rest } : ParsingErrorProperties<T>) {
+      super();
+      Object.assign(this, { ...rest, loc, pos: indexes.get(loc) });
+    }/*
+      get message () {
+        return toMessage(this);
+    }*/
 }
 
-export { ErrorCodes };
-export {
-  ErrorMessages as Errors,
-  SourceTypeModuleErrorMessages as SourceTypeModuleErrors,
-} from "./error-message";
+type Origin = { node: NodeBase } | { at: Position };
+export type RaiseProperties<T extends ParsingErrorClass> = Origin & Omit<Parameters<T["toMessage"]>[0], "loc">;
 
-export type raiseFunction = (ErrorTemplate, Origin, ...any) => void;
-export type ErrorData = { message: ErrorTemplate, loc: Position };
+type ParsingErrorClasses<T> = {
+  [K in keyof T]: ParsingErrorClass & { toMessage: T[K] }
+}
 
-export default class ParserError extends CommentsParser {
-  // Forward-declaration: defined in tokenizer/index.js
-  /*::
-  +isLookahead: boolean;
-  */
-
-  isLookahead: boolean;
-
-  raise(
-    { code, reasonCode, template }: ErrorTemplate,
-    origin: Origin,
-    ...params: any
-  ): Error | never {
-    return this.raiseWithData(
-      "node" in origin ? origin.node.loc.start : origin.at,
-      { code, reasonCode },
-      template,
-      ...params,
-    );
-  }
-
-  /**
-   * Raise a parsing error on given position pos. If errorRecovery is true,
-   * it will first search current errors and overwrite the error thrown on the exact
-   * position before with the new error message. If errorRecovery is false, it
-   * fallbacks to `raise`.
-   *
-   * @param {number} pos
-   * @param {string} errorTemplate
-   * @param {...any} params
-   * @returns {(Error | never)}
-   * @memberof ParserError
-   */
-  raiseOverwrite(
-    loc: Position,
-    { code, template }: ErrorTemplate,
-    ...params: any
-  ): Error | never {
-    const pos = loc.index;
-    const message =
-      template.replace(/%(\d+)/g, (_, i: number) => params[i]) +
-      ` (${loc.line}:${loc.column})`;
-    if (this.options.errorRecovery) {
-      const errors = this.state.errors;
-      for (let i = errors.length - 1; i >= 0; i--) {
-        const error = errors[i];
-        if (error.pos === pos) {
-          return Object.assign(error, { message });
-        } else if (error.pos < pos) {
-          break;
-        }
-      }
-    }
-    return this._raise({ code, loc, pos }, message);
-  }
-
-  raiseWithData(
-    loc: Position,
-    data: {
-      missingPlugin?: string[],
-      code?: string,
-    } | null | undefined,
-    errorTemplate: string,
-    ...params: any
-  ): Error | never {
-    const pos = loc.index;
-    const message =
-      errorTemplate.replace(/%(\d+)/g, (_, i: number) => params[i]) +
-      ` (${loc.line}:${loc.column})`;
-    return this._raise(Object.assign(({ loc, pos } as any), data), message);
-  }
-
-  _raise(errorContext: ErrorContext, message: string): Error | never {
-    // $FlowIgnore
-    const err: SyntaxError & ErrorContext = new SyntaxError(message);
-    Object.assign(err, errorContext);
-    if (this.options.errorRecovery) {
-      if (!this.isLookahead) this.state.errors.push(err);
-      return err;
-    } else {
-      throw err;
-    }
-  }
+export function toParsingErrorClasses<T>(templates: T) : ParsingErrorClasses<T> {
+  // @ts-ignore
+  return Object.fromEntries(Object.entries(templates).map(([key, value]) => [key, toErrorClass([key, value])]));
 }

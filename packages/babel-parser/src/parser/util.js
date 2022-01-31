@@ -118,12 +118,6 @@ export default class UtilParser extends Tokenizer {
     );
   }
 
-  hasPrecedingLineBreak(): boolean {
-    return lineBreak.test(
-      this.input.slice(this.state.lastTokEndLoc.index, this.state.start),
-    );
-  }
-
   hasFollowingLineBreak(): boolean {
     skipWhiteSpaceToLineBreak.lastIndex = this.state.end;
     return skipWhiteSpaceToLineBreak.test(this.input);
@@ -164,25 +158,6 @@ export default class UtilParser extends Tokenizer {
         /* eslint-enable @babel/development-internal/dry-error-messages */
       );
     }
-  }
-
-  // Raise an unexpected token error. Can take the expected token type
-  // instead of a message string.
-
-  unexpected(loc?: ?Position, type?: ?TokenType): empty {
-    /* eslint-disable @babel/development-internal/dry-error-messages */
-    throw this.raise(
-      {
-        code: ErrorCodes.SyntaxError,
-        reasonCode: "UnexpectedToken",
-        template:
-          type != null
-            ? `Unexpected token, expected "${tokenLabelName(type)}"`
-            : "Unexpected token",
-      },
-      { at: loc != null ? loc : this.state.startLoc },
-    );
-    /* eslint-enable @babel/development-internal/dry-error-messages */
   }
 
   getPluginNamesFromConfigs(pluginConfigs: Array<PluginConfig>): Array<string> {

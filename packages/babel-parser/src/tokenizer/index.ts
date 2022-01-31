@@ -2,6 +2,7 @@
 
 import type { Options } from "../options";
 import { Position, createPositionWithColumnOffset } from "../util/location";
+import CommentsParser from "../parser/comments";
 import * as N from "../types";
 import * as charCodes from "charcodes";
 import { isIdentifierStart, isIdentifierChar } from "../util/identifier";
@@ -13,10 +14,11 @@ import {
 } from "./types";
 import type { TokenType } from "./types";
 import type { TokContext } from "./context";
-import ParserErrors, { Errors,  } from "../parser/error";
-import type { ErrorTemplate } from "../parser/error";
+import type { ParsingErrorClass, RaiseProperties } from "../parser/error";
+import Errors from "../parser/errors";
 import { SourceLocation } from "../util/location";
 import {
+  lineBreak,
   lineBreakG,
   isNewLine,
   isWhitespace,
@@ -123,23 +125,28 @@ export class Token {
 
 // ## Tokenizer
 
-export default abstract class Tokenizer extends ParserErrors {
+export default abstract class Tokenizer extends CommentsParser {
 
-  abstract hasPrecedingLineBreak: () => boolean;
   abstract expectPlugin: (name: string, loc?: Position) => true;
-  /*+unexpected: (loc?: ?Position, type?: TokenType) => empty;
-  */
+
+  isLookahead: boolean = false;
+
+  state: State = new State();
 
   // Token store.
   tokens: (Token | N.Comment)[] = [];
 
   constructor(options: Options, input: string) {
     super();
-    this.state = new State();
     this.state.init(options);
     this.input = input;
     this.length = input.length;
-    this.isLookahead = false;
+  }
+
+  hasPrecedingLineBreak(): boolean {
+    return lineBreak.test(
+      this.input.slice(this.state.lastTokEndLoc.index, this.state.start),
+    );
   }
 
   pushToken(token: Token | N.Comment) {
@@ -1064,11 +1071,10 @@ export default abstract class Tokenizer extends ParserErrors {
         }
     }
 
-    throw this.raise(
-      Errors.InvalidOrUnexpectedToken,
-      { at: this.state.curPosition() },
-      String.fromCodePoint(code),
-    );
+    throw this.raise(Errors.InvalidOrUnexpectedToken, {
+      found: String.fromCodePoint(code),
+      at: this.state.curPosition()
+    });
   }
 
   finishOp(type: TokenType, size: number): void {
@@ -1233,11 +1239,10 @@ export default abstract class Tokenizer extends ParserErrors {
 
         if (this.options.errorRecovery && val <= 9) {
           val = 0;
-          this.raise(
-            Errors.InvalidDigit,
-            { at: this.state.curPosition() },
+          this.raise(Errors.InvalidDigit, {
             radix,
-          );
+            at: this.state.curPosition()
+          });
         } else if (forceLen) {
           val = 0;
           invalid = true;
@@ -1266,12 +1271,11 @@ export default abstract class Tokenizer extends ParserErrors {
     this.state.pos += 2; // 0x
     const val = this.readInt(radix);
     if (val == null) {
-      this.raise(
-        Errors.InvalidDigit,
-        // Numeric literals can't have newlines, so this is safe to do.
-        { at: createPositionWithColumnOffset(startLoc, 2) },
+      this.raise(Errors.InvalidDigit, {
         radix,
-      );
+        // Numeric literals can't have newlines, so this is safe to do.
+        at: createPositionWithColumnOffset(startLoc, 2),
+    });
     }
     const next = this.input.charCodeAt(this.state.pos);
 
@@ -1459,9 +1463,6 @@ export default abstract class Tokenizer extends ParserErrors {
     }
     out += this.input.slice(chunkStart, this.state.pos++);
     this.finishToken(tt.string, out);
-  }
-  
-  unexpected(loc?: Position | null, type?: TokenType): void {
   }
 
   // Reads template continuation `}...`
@@ -1730,12 +1731,36 @@ export default abstract class Tokenizer extends ParserErrors {
   checkKeywordEscapes(): void {
     const { type } = this.state;
     if (tokenIsKeyword(type) && this.state.containsEsc) {
-      this.raise(
-        Errors.InvalidEscapedReservedWord,
-        { at: this.state.startLoc },
-        tokenLabelName(type),
-      );
+      this.raise(Errors.InvalidEscapedReservedWord, {
+        keyword: tokenLabelName(type),
+        at: this.state.startLoc
+      });
     }
+  }
+
+  raise<T extends ParsingErrorClass>(
+    ParsingError: T,
+    properties: RaiseProperties<T>,
+  ) {
+    const loc =
+      "node" in properties ? properties.node.loc.start : properties.at;
+
+    const { node: _, at: __, ...rest } = properties;
+    const error = new ParsingError({ loc, ...rest });
+
+    /*!SyntaxError.recoverable || */
+    if (!this.options.errorRecovery) throw error;
+    if (!this.isLookahead) this.state.errors.push(error);
+
+    return error;
+  }
+
+  // Raise an unexpected token error. Can take the expected token type.
+  unexpected(loc?: Position | null, type?: TokenType): void {
+    throw this.raise(Errors.UnexpectedToken, {
+      expected: !!type ? tokenLabelName(type) : null,
+      at: loc != null ? loc : this.state.startLoc,
+    });
   }
 
   // updateContext is used by the jsx plugin

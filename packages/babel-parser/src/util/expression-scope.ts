@@ -1,5 +1,7 @@
-import type { ErrorData, ErrorTemplate, raiseFunction } from "../parser/error";
 import { Position } from "./location";
+import Tokenizer from "../tokenizer";
+
+type ErrorTemplate = any;
 
 /*:: declare var invariant; */
 /**
@@ -89,10 +91,10 @@ class ArrowHeadParsingScope extends ExpressionScope {
 }
 
 export default class ExpressionScopeHandler {
-  stack: Array<ExpressionScope> = [new ExpressionScope()];
-  declare raise: raiseFunction;
-  constructor(raise: raiseFunction) {
-    this.raise = raise;
+  stack: ExpressionScope[] = [new ExpressionScope()];
+  parser: Tokenizer;
+  constructor(parser: Tokenizer) {
+    this.parser = parser;
   }
   enter(scope: ExpressionScope) {
     this.stack.push(scope);
@@ -131,7 +133,7 @@ export default class ExpressionScopeHandler {
       scope = stack[--i];
     }
     /* eslint-disable @babel/development-internal/dry-error-messages */
-    this.raise(template, { at: loc });
+    this.parser.raise(template, { at: loc });
   }
 
   /**
@@ -162,7 +164,7 @@ export default class ExpressionScopeHandler {
     const { stack } = this;
     const scope: ExpressionScope = stack[stack.length - 1];
     if (scope.isCertainlyParameterDeclaration()) {
-      this.raise(template, { at: loc });
+      this.parser.raise(template, { at: loc });
     } else if (scope.canBeArrowParameterDeclaration()) {
       /*:: invariant(scope instanceof ArrowHeadParsingScope) */
       scope.recordDeclarationError(template, loc);
@@ -203,7 +205,7 @@ export default class ExpressionScopeHandler {
     /*:: invariant(currentScope instanceof ArrowHeadParsingScope) */
     currentScope.iterateErrors(({ message, loc }) => {
       /* eslint-disable @babel/development-internal/dry-error-messages */
-      this.raise(message, { at: loc });
+      this.parser.raise(message, { at: loc });
       // iterate from parent scope
       let i = stack.length - 2;
       let scope = stack[i];
