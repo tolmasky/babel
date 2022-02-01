@@ -14,7 +14,7 @@ import {
 } from "./types";
 import type { TokenType } from "./types";
 import type { TokContext } from "./context";
-import type { ParsingErrorClass, RaiseProperties } from "../parser/error";
+import type { ParsingErrorClass } from "../parser/error";
 import Errors from "../parser/errors";
 import { SourceLocation } from "../util/location";
 import {
@@ -1738,15 +1738,11 @@ export default abstract class Tokenizer extends CommentsParser {
     }
   }
 
-  raise<T extends ParsingErrorClass>(
+  raise<T extends ParsingErrorClass<any> >(
     ParsingError: T,
-    properties: RaiseProperties<T>,
+    properties: ConstructorParameters<T>[0],
   ) {
-    const loc =
-      "node" in properties ? properties.node.loc.start : properties.at;
-
-    const { node: _, at: __, ...rest } = properties;
-    const error = new ParsingError({ loc, ...rest });
+    const error = new ParsingError(properties);
 
     /*!SyntaxError.recoverable || */
     if (!this.options.errorRecovery) throw error;
