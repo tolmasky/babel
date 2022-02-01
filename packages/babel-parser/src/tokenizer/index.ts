@@ -25,7 +25,7 @@ import {
   skipWhiteSpace,
 } from "../util/whitespace";
 import State from "./state";
-import type { LookaheadState } from "./state";
+import type { LookaheadState, StrictParsingErrorClass } from "./state";
 
 const VALID_REGEX_FLAGS = new Set([
   charCodes.lowercaseG,
@@ -286,9 +286,8 @@ export default abstract class Tokenizer extends CommentsParser {
       // after a "use strict" directive. Strict mode will be set at parse
       // time for any literals that occur after the next node of the strict
       // directive.
-      this.state.strictErrors.forEach(({ message, loc }) =>
-        /* eslint-disable @babel/development-internal/dry-error-messages */
-        this.raise(message, { at: loc }),
+      this.state.strictErrors.forEach(([ParsingError, properties]) =>
+        this.raise(ParsingError, properties),
       );
       this.state.strictErrors.clear();
     }
@@ -1323,7 +1322,7 @@ export default abstract class Tokenizer extends CommentsParser {
 
     if (hasLeadingZero) {
       const integer = this.input.slice(start, this.state.pos);
-      this.recordStrictModeErrors(Errors.StrictOctalLiteral, startLoc);
+      this.recordStrictModeErrors(Errors.StrictOctalLiteral, { at: startLoc });
       if (!this.state.strict) {
         // disallow numeric separators in non octal decimals and legacy octal likes
         const underscorePos = integer.indexOf("_");
@@ -1538,11 +1537,17 @@ export default abstract class Tokenizer extends CommentsParser {
     }
   }
 
-  recordStrictModeErrors(message: ErrorTemplate, loc: Position) {
-    if (this.state.strict && !this.state.strictErrors.has(loc.index)) {
-      this.raise(message, { at: loc });
+  recordStrictModeErrors<T extends StrictParsingErrorClass>(
+    ParsingError: T,
+    { at, ...properties }: ConstructorParameters<T>[0],
+  ) {
+    const loc = at instanceof Position ? at : at.loc;
+    const index = loc.index;
+
+    if (this.state.strict && !this.state.strictErrors.has(index)) {
+      this.raise(ParsingError, { at, ...properties });
     } else {
-      this.state.strictErrors.set(loc.index, { loc, message });
+      this.state.strictErrors.set(index, [ParsingError, { at, ...properties }]);
     }
   }
 
@@ -1589,12 +1594,11 @@ export default abstract class Tokenizer extends CommentsParser {
         if (inTemplate) {
           return null;
         } else {
-          this.recordStrictModeErrors(
-            Errors.StrictNumericEscape,
+          this.recordStrictModeErrors(Errors.StrictNumericEscape, {
             // We immediately follow a "\\", and we're an 8 or a 9, so we must
             // be on the same line.
-            createPositionWithColumnOffset(this.state.curPosition(), -1),
-          );
+            at: createPositionWithColumnOffset(this.state.curPosition(), -1),
+          });
         }
       // fall through
       default:
@@ -1628,7 +1632,9 @@ export default abstract class Tokenizer extends CommentsParser {
             if (inTemplate) {
               return null;
             } else {
-              this.recordStrictModeErrors(Errors.StrictNumericEscape, codePos);
+              this.recordStrictModeErrors(Errors.StrictNumericEscape, {
+                at: codePos
+              });
             }
           }
 

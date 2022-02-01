@@ -7,7 +7,12 @@ import { types as ct } from "./context";
 import type { TokContext } from "./context";
 import { tt } from "./types";
 import type { TokenType } from "./types";
-import type { ParsingError } from "../parser/error";
+import type { ParsingError, ParsingErrorClass, DeferredErrorDescriptionMap } from "../parser/error";
+import Errors from "../parser/errors";
+
+export type StrictParsingErrorClass =
+    | typeof Errors.StrictNumericEscape
+    | typeof Errors.StrictOctalLiteral;
 
 type TopicContextState = {
   // When a topic binding has been currently established,
@@ -92,7 +97,7 @@ export default class State {
   // Leading decorators. Last element of the stack represents the decorators in current context.
   // Supports nesting of decorators, e.g. @foo(@bar class inner {}) class outer {}
   // where @foo belongs to the outer class and @bar to the inner
-  decoratorStack: Array<Array<N.Decorator>> = [[]];
+  decoratorStack: N.Decorator[][] = [[]];
 
   // Comment store for Program.comments
   comments: Array<N.Comment> = [];
@@ -140,7 +145,8 @@ export default class State {
 
   // todo(JLHwung): set strictErrors to null and avoid recording string errors
   // after a non-directive is parsed
-  strictErrors: Map<number, ParsingError> = new Map();
+  //strictErrors: Map<number, UnraisedStrictParsingError> = new Map();
+  strictErrors: DeferredErrorDescriptionMap<StrictParsingErrorClass> = new Map();
 
   // Tokens length in token store
   tokensLength: number = 0;
