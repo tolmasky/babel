@@ -1,6 +1,4 @@
-// @flow
-
-import { type Position } from "../util/location";
+import type { Position } from "../util/location";
 import {
   tokenIsLiteralPropertyName,
   tokenLabelName,
@@ -12,6 +10,7 @@ import State from "../tokenizer/state";
 import type { Node } from "../types";
 import { lineBreak, skipWhiteSpaceToLineBreak } from "../util/whitespace";
 import { isIdentifierChar } from "../util/identifier";
+import ScopeHandler from "../util/scope";
 import ClassScopeHandler from "../util/class-scope";
 import ExpressionScopeHandler from "../util/expression-scope";
 import { SCOPE_PROGRAM } from "../util/scopeflags";
@@ -19,12 +18,10 @@ import ProductionParameterHandler, {
   PARAM_AWAIT,
   PARAM,
 } from "../util/production-parameter";
-import { Errors, type ErrorTemplate, ErrorCodes } from "./error";
-import type { ParsingError } from "./error";
+import Errors from "./errors";
+
+import type { ParsingError, ParsingErrorClass } from "./error";
 import type { PluginConfig } from "./base";
-/*::
-import type ScopeHandler from "../util/scope";
-*/
 
 type TryParse<Node, Error, Thrown, Aborted, FailState> = {
   node: Node,
@@ -37,10 +34,6 @@ type TryParse<Node, Error, Thrown, Aborted, FailState> = {
 // ## Parser utilities
 
 export default class UtilParser extends Tokenizer {
-  // Forward-declaration: defined in parser/index.js
-  /*::
-  +getScopeHandler: () => Class<ScopeHandler<*>>;
-  */
 
   // TODO
 
@@ -98,11 +91,10 @@ export default class UtilParser extends Tokenizer {
 
   // Asserts that following token is given contextual keyword.
 
-  expectContextual(token: TokenType, template?: ErrorTemplate): void {
+  expectContextual(token: TokenType, ParsingError?: ParsingErrorClass<any>): void {
     if (!this.eatContextual(token)) {
-      if (template != null) {
-        /* eslint-disable @babel/development-internal/dry-error-messages */
-        throw this.raise(template, { at: this.state.startLoc });
+      if (ParsingError != null) {
+        throw this.raise(ParsingError, { at: this.state.startLoc });
       }
       throw this.unexpected(null, token);
     }
@@ -140,70 +132,18 @@ export default class UtilParser extends Tokenizer {
   // Expect a token of a given type. If found, consume it, otherwise,
   // raise an unexpected token error at given pos.
 
-  expect(type: TokenType, loc?: ?Position): void {
+  expect(type: TokenType, loc?: Position): void {
     this.eat(type) || this.unexpected(loc, type);
-  }
-
-  // Throws if the current token and the prev one are separated by a space.
-  assertNoSpace(message: string = "Unexpected space."): void {
-    if (this.state.start > this.state.lastTokEndLoc.index) {
-      /* eslint-disable @babel/development-internal/dry-error-messages */
-      this.raise(
-        {
-          code: ErrorCodes.SyntaxError,
-          reasonCode: "UnexpectedSpace",
-          template: message,
-        },
-        { at: this.state.lastTokEndLoc },
-        /* eslint-enable @babel/development-internal/dry-error-messages */
-      );
-    }
-  }
-
-  getPluginNamesFromConfigs(pluginConfigs: Array<PluginConfig>): Array<string> {
-    return pluginConfigs.map(c => {
-      if (typeof c === "string") {
-        return c;
-      } else {
-        return c[0];
-      }
-    });
-  }
-
-  expectPlugin(pluginConfig: PluginConfig, loc?: ?Position): true {
-    if (!this.hasPlugin(pluginConfig)) {
-      throw this.raiseWithData(
-        loc != null ? loc : this.state.startLoc,
-        { missingPlugin: this.getPluginNamesFromConfigs([pluginConfig]) },
-        `This experimental syntax requires enabling the parser plugin: ${JSON.stringify(
-          pluginConfig,
-        )}.`,
-      );
-    }
-
-    return true;
-  }
-
-  expectOnePlugin(pluginConfigs: Array<PluginConfig>): void {
-    if (!pluginConfigs.some(c => this.hasPlugin(c))) {
-      throw this.raiseWithData(
-        this.state.startLoc,
-        { missingPlugin: this.getPluginNamesFromConfigs(pluginConfigs) },
-        `This experimental syntax requires enabling one of the following parser plugin(s): ${pluginConfigs
-          .map(c => JSON.stringify(c))
-          .join(", ")}.`,
-      );
-    }
   }
 
   // tryParse will clone parser state.
   // It is expensive and should be used with cautions
-  tryParse<T: Node | $ReadOnlyArray<Node>>(
-    fn: (abort: (node?: T) => empty) => T,
+  tryParse<T extends Node | readonly Node[]>(
+    fn: (abort: (node?: T) => never) => T,
     oldState: State = this.state.clone(),
   ):
     | TryParse<T, null, false, false, null>
-    | TryParse<T | null, ParsingError, boolean, false, State>
+    | TryParse<T | null, SyntaxError, boolean, false, State>
     | TryParse<T | null, null, false, true, State> {
     const abortSignal: { node: T | null } = { node: null };
     try {
@@ -220,7 +160,7 @@ export default class UtilParser extends Tokenizer {
         this.state.tokensLength = failState.tokensLength;
         return {
           node,
-          error: (failState.errors[oldState.errors.length]: ParsingError),
+          error: failState.errors[oldState.errors.length],//: ParsingError),
           thrown: false,
           aborted: false,
           failState,
@@ -255,7 +195,7 @@ export default class UtilParser extends Tokenizer {
   }
 
   checkExpressionErrors(
-    refExpressionErrors: ?ExpressionErrors,
+    refExpressionErrors: ExpressionErrors | null | undefined,
     andThrow: boolean,
   ) {
     if (!refExpressionErrors) return false;
@@ -369,7 +309,7 @@ export default class UtilParser extends Tokenizer {
 
     const oldScope = this.scope;
     const ScopeHandler = this.getScopeHandler();
-    this.scope = new ScopeHandler(this.raise.bind(this), this.inModule);
+    this.scope = new ScopeHandler(this, this.inModule);
 
     const oldProdParam = this.prodParam;
     this.prodParam = new ProductionParameterHandler();
@@ -409,6 +349,11 @@ export default class UtilParser extends Tokenizer {
       this.expectPlugin("destructuringPrivate", privateKeyLoc);
     }
   }
+  
+  // This can be overwritten, for example, by the TypeScript plugin.
+  getScopeHandler(): typeof ScopeHandler {
+    return ScopeHandler;
+  }
 }
 
 /**
@@ -425,8 +370,8 @@ export default class UtilParser extends Tokenizer {
  * It's only used by typescript and flow plugins
  */
 export class ExpressionErrors {
-  shorthandAssignLoc: ?Position = null;
-  doubleProtoLoc: ?Position = null;
-  privateKeyLoc: ?Position = null;
-  optionalParametersLoc: ?Position = null;
+  shorthandAssignLoc: Position | null | undefined = null;
+  doubleProtoLoc: Position | null | undefined  = null;
+  privateKeyLoc: Position | null | undefined = null;
+  optionalParametersLoc: Position | null | undefined = null;
 }

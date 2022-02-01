@@ -127,8 +127,6 @@ export class Token {
 
 export default abstract class Tokenizer extends CommentsParser {
 
-  abstract expectPlugin: (name: string, loc?: Position) => true;
-
   isLookahead: boolean = false;
 
   state: State = new State();
@@ -1768,4 +1766,24 @@ export default abstract class Tokenizer extends CommentsParser {
   // updateContext is used by the jsx plugin
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   updateContext(prevType?: TokenType): void {}
+
+  expectPlugin(pluginName: string, loc?: Position): true {
+    if (this.hasPlugin(pluginName)) {
+      return true;
+    }
+
+    throw this.raise(Errors.MissingPlugin, {
+      at: loc != null ? loc : this.state.startLoc,
+      missingPlugin: pluginName
+    });
+  }
+
+  expectOnePlugin(pluginNames: string[]): void {
+    if (!pluginNames.some(name => this.hasPlugin(name))) {
+      throw this.raise(Errors.MissingOneOfPlugins, {
+        at: this.state.startLoc,
+        missingPlugin: pluginNames
+      });
+    }
+  }
 }

@@ -99,6 +99,14 @@ export default toParsingErrorClasses({
   MissingEqInAssignment: () =>
     "Only '=' operator can be used for specifying default value.",
   MissingSemicolon: () => "Missing semicolon.",
+  MissingPlugin: ({ missingPlugin } : { missingPlugin: string }) =>
+    `This experimental syntax requires enabling the parser plugin: "${missingPlugin}".`,
+  // FIXME: Would be nice to make this "missingPlugins" instead.
+  // Also, seems like we can drop the "(s)" from the message and just make it "s".
+  MissingOneOfPlugins: ({ missingPlugin } : { missingPlugin: string[] }) =>
+    `This experimental syntax requires enabling one of the following parser plugin(s): ${
+        missingPlugin.map(name => JSON.stringify(name)).join(", ")
+    }.`,
   MissingUnicodeEscape: () => "Expecting Unicode escape sequence \\uXXXX.",
   MixingCoalesceWithLogical: () =>
     "Nullish coalescing operator(??) requires parens when mixing with logical operators.",
@@ -141,7 +149,7 @@ export default toParsingErrorClasses({
     "Hack-style pipe body does not contain a topic reference; Hack-style pipes must use topic at least once.",
   PipeUnparenthesizedBody: () =>
     "Hack-style pipe body cannot be an unparenthesized %0 expression; please wrap it in parentheses.",
-  
+
   // Messages whose codes start with “Pipeline” or “PrimaryTopic”
   // are retained for backwards compatibility
   // with the deprecated smart-mix pipe operator proposal plugin.
@@ -158,7 +166,7 @@ export default toParsingErrorClasses({
     "Topic reference was used in a lexical context without topic binding.",
   PrimaryTopicRequiresSmartPipeline: () =>
     'Topic reference is used, but the pipelineOperator plugin was not passed a "proposal": () => "hack" or "smart" option.',
-  
+
   PrivateInExpectedIn: () =>
     "Private names are only allowed in property accesses (`obj.#%0`) or in `in` expressions (`#%0 in obj`).",
   PrivateNameRedeclaration: ({ name }: { name: string }) => `Duplicate private name #${name}.`,
@@ -198,11 +206,7 @@ export default toParsingErrorClasses({
   UnexpectedDigitAfterHash: () => "Unexpected digit after hash token.",
   UnexpectedImportExport: () =>
     "'import' and 'export' may only appear at the top level.",
-  
-  
   UnexpectedKeyword: ({ keyword }: { keyword: string }) => `Unexpected keyword '${keyword}'.`,
-  
-  
   UnexpectedLeadingDecorator: () =>
     "Leading decorators must be attached to a class declaration.",
   UnexpectedLexicalDeclaration: () =>
@@ -214,12 +218,10 @@ export default toParsingErrorClasses({
   UnexpectedPrivateField: () => "Unexpected private name.",
   UnexpectedReservedWord: () => "Unexpected reserved word '%0'.",
   UnexpectedSuper: () => "'super' is only allowed in object methods and classes.",
-  
   UnexpectedToken: ({ loc: { line, column }, expected } : { loc: Position, expected?: string }) =>
     !!expected
       ? `Unexpected token, expected "${expected}"`
       : "Unexpected token",
-  
   UnexpectedTokenUnaryExponentiation: () =>
     "Illegal expression. Wrap left hand side or entire exponentiation in parentheses.",
   UnsupportedBind: () => "Binding should be performed on object property.",

@@ -36,7 +36,7 @@ class TypeScriptScope extends Scope {
 // See https://github.com/babel/babel/pull/9766#discussion_r268920730 for an
 // explanation of how typescript handles scope.
 
-export default class TypeScriptScopeHandler extends ScopeHandler<TypeScriptScope> {
+export default class TypeScriptScopeHandler extends ScopeHandler {
   createScope(flags: ScopeFlags): TypeScriptScope {
     return new TypeScriptScope(flags);
   }

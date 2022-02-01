@@ -52,7 +52,8 @@ type MaybePlaceholder<T: PlaceholderTypes> = NodeOf<T>; // | Placeholder<T>
 /* eslint sort-keys: "error" */
 const PlaceholderErrors = makeErrorTemplates(
   {
-    ClassNameIsRequired: "A class name is required.",
+    ClassNameIsRequired: () => "A class name is required.",
+    UnexpectedSpace: () => "Unexpected space in placeholder."
   },
   /* code */ ErrorCodes.SyntaxError,
   /* syntaxPlugin */ "placeholders",
@@ -67,13 +68,13 @@ export default (superClass: Class<Parser>): Class<Parser> =>
       if (this.match(tt.placeholder)) {
         const node = this.startNode();
         this.next();
-        this.assertNoSpace("Unexpected space in placeholder.");
+        this.assertNoSpace();
 
         // We can't use this.parseIdentifier because
         // we don't want nested placeholders.
         node.name = super.parseIdentifier(/* liberal */ true);
 
-        this.assertNoSpace("Unexpected space in placeholder.");
+        this.assertNoSpace();
         this.expect(tt.placeholder);
         return this.finishPlaceholder(node, expectedNode);
       }
@@ -366,5 +367,14 @@ export default (superClass: Class<Parser>): Class<Parser> =>
         this.parsePlaceholder("StringLiteral") ||
         super.parseImportSource(...arguments)
       );
+    }
+
+    // Throws if the current token and the prev one are separated by a space.
+    assertNoSpace(): void {
+      if (this.state.start > this.state.lastTokEndLoc.index) {
+        this.raise(PlaceholderErrors, {
+          at: this.state.lastTokEndLoc
+        });
+      }
     }
   };

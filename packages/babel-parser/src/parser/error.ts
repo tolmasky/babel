@@ -18,9 +18,11 @@ export interface ParsingErrorClass<T extends ToMessage>
 };
 
 export interface ParsingError {
+  name: string;
+  message: string;
+
   loc: Position;
   pos: number;
-  //  missingPlugin?: string[];
   code: string;
   reasonCode: string;
 };
@@ -34,6 +36,9 @@ const toParsingErrorClass = <T extends ToMessage>([key, toMessage]: [
   T
 ]): ParsingErrorClass<T> =>
   class extends SyntaxError implements ParsingError {
+    // For backwards compatibility for now.
+    name: string = "SyntaxError";
+
     loc: Position;
     pos: number;
     code: string = ErrorCodes.SyntaxError;

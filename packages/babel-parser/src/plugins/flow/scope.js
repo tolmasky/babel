@@ -15,7 +15,7 @@ class FlowScope extends Scope {
   declareFunctions: Set<string> = new Set();
 }
 
-export default class FlowScopeHandler extends ScopeHandler<FlowScope> {
+export default class FlowScopeHandler extends ScopeHandler {
   createScope(flags: ScopeFlags): FlowScope {
     return new FlowScope(flags);
   }

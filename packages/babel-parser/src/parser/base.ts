@@ -10,7 +10,7 @@ export default class BaseParser {
   // Properties set by constructor in index.js
   declare options: Options;
   declare inModule: boolean;
-  declare scope: ScopeHandler<any>;
+  declare scope: ScopeHandler;
   declare classScope: ClassScopeHandler;
   declare prodParam: ProductionParameterHandler;
   declare expressionScope: ExpressionScopeHandler;

@@ -37,17 +37,29 @@ export class Scope {
   }
 }
 
+type ScopeOf<T extends { createScope: (...args: any[]) => Scope }> = ReturnType<T["createScope"]>;
+
 // The functions in this module keep track of declared variables in the
 // current scope in order to detect duplicate variable names.
-export default class ScopeHandler<IScope extends Scope> {
+export default class ScopeHandler {
+
+  // Subclasses must override this method and return the appropriate associated
+  // `Scope` subclass. We can't do fancy generic tricks because tyepscript loses
+  // any type information at runtime, which means we don't have anyway of
+  // deriving the `Scope` constructor without needing it to also be specified.
+  // Instead, if you *just* define `createScope` in your subclass, we can infer
+  // the `Scope` subclass from it's return type.
+
+  createScope(flags: ScopeFlags) : Scope {
+    return new Scope(flags);
+  }
+
   parser: Tokenizer;
-  ScopeConstructor: { new (ScopeFlags): IScope };
-  scopeStack: IScope[] = [];
+  scopeStack: ScopeOf<this>[] = [];
   inModule: boolean;
   undefinedExports: Map<string, Position> = new Map();
 
-  constructor(ScopeConstructor: { new (ScopeFlags): IScope }, parser: Tokenizer, inModule: boolean) {
-    this.ScopeConstructor = ScopeConstructor;
+  constructor(parser: Tokenizer, inModule: boolean) {
     this.parser = parser;
     this.inModule = inModule;
   }
@@ -87,14 +99,9 @@ export default class ScopeHandler<IScope extends Scope> {
     return this.treatFunctionsAsVarInScope(this.currentScope());
   }
 
-  createScope(flags: ScopeFlags): IScope {
-    return new this.ScopeConstructor(flags);
-  }
-  // This method will be overwritten by subclasses
-  /*:: +createScope: (flags: ScopeFlags) => IScope; */
 
   enter(flags: ScopeFlags) {
-    this.scopeStack.push(this.createScope(flags));
+    this.scopeStack.push(this.createScope(flags) as ScopeOf<this>);
   }
 
   exit() {
@@ -104,7 +111,7 @@ export default class ScopeHandler<IScope extends Scope> {
   // The spec says:
   // > At the top level of a function, or script, function declarations are
   // > treated like var declarations rather than like lexical declarations.
-  treatFunctionsAsVarInScope(scope: IScope): boolean {
+  treatFunctionsAsVarInScope(scope: ScopeOf<this>): boolean {
     return !!(
       scope.flags & SCOPE_FUNCTION ||
       (!this.inModule && scope.flags & SCOPE_PROGRAM)
@@ -140,14 +147,14 @@ export default class ScopeHandler<IScope extends Scope> {
     }
   }
 
-  maybeExportDefined(scope: IScope, name: string) {
+  maybeExportDefined(scope: ScopeOf<this>, name: string) {
     if (this.inModule && scope.flags & SCOPE_PROGRAM) {
       this.undefinedExports.delete(name);
     }
   }
 
   checkRedeclarationInScope(
-    scope: IScope,
+    scope: ScopeOf<this>,
     name: string,
     bindingType: BindingTypes,
     loc: Position,
@@ -158,7 +165,7 @@ export default class ScopeHandler<IScope extends Scope> {
   }
 
   isRedeclaredInScope(
-    scope: IScope,
+    scope: ScopeOf<this>,
     name: string,
     bindingType: BindingTypes,
   ): boolean {
@@ -204,7 +211,7 @@ export default class ScopeHandler<IScope extends Scope> {
     }
   }
 
-  currentScope(): IScope {
+  currentScope(): ScopeOf<this> {
     return this.scopeStack[this.scopeStack.length - 1];
   }
 
