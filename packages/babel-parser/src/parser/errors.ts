@@ -78,8 +78,10 @@ export default toParsingErrorClasses({
   InvalidEscapeSequenceTemplate: () => "Invalid escape sequence in template.",
   InvalidEscapedReservedWord: ({ keyword } : { keyword: string }) => `Escape sequence in keyword ${keyword}.`,
   InvalidIdentifier: () => "Invalid identifier %0.",
-  InvalidLhs: () => "Invalid left-hand side in %0.",
-  InvalidLhsBinding: () => "Binding invalid left-hand side in %0.",
+  InvalidLhs:
+    ({ contextDescription } : { contextDescription: string }) => `Invalid left-hand side in ${contextDescription}.`,
+  InvalidLhsBinding:
+    ({ contextDescription } : { contextDescription: string }) => `Binding invalid left-hand side in ${contextDescription}.`,
   InvalidNumber: () => "Invalid number.",
   InvalidOrMissingExponent: () =>
     "Floating-point numbers require a valid exponent after the 'e'.",
@@ -182,8 +184,10 @@ export default toParsingErrorClasses({
     "In non-strict mode code, functions can only be declared at top level, inside a block, or as the body of an if statement.",
   StaticPrototype: () => "Classes may not have static property named prototype.",
   StrictDelete: () => "Deleting local variable in strict mode.",
-  StrictEvalArguments: () => "Assigning to '%0' in strict mode.",
-  StrictEvalArgumentsBinding: () => "Binding '%0' in strict mode.",
+  StrictEvalArguments:
+    ({ name } : { name: string }) => `Assigning to '${name}' in strict mode.`,
+  StrictEvalArgumentsBinding:
+    ({ name } : { name: string }) => `Binding '${name}' in strict mode.`,
   StrictFunction: () =>
     "In strict mode code, functions can only be declared at top level or inside a block.",
   StrictNumericEscape: () =>
