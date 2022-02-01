@@ -2698,7 +2698,7 @@ export default class ExpressionParser extends LValParser {
 
       this.expressionScope.recordAsyncArrowParametersError(
         Errors.AwaitBindingIdentifier,
-        startLoc,
+        { at: startLoc },
       );
     } else if (word === "arguments") {
       if (this.scope.inClassAndNotInNonArrowFunction) {
@@ -2737,8 +2737,8 @@ export default class ExpressionParser extends LValParser {
     const node = this.startNodeAt(startPos, startLoc);
 
     this.expressionScope.recordParameterInitializerError(
-      node.loc.start,
       Errors.AwaitExpressionFormalParameter,
+      { at: node },
     );
 
     if (this.eat(tt.star)) {
@@ -2786,8 +2786,8 @@ export default class ExpressionParser extends LValParser {
     const node = this.startNode();
 
     this.expressionScope.recordParameterInitializerError(
-      node.loc.start,
       Errors.YieldInParameter,
+      { at: node },
     );
 
     this.next();

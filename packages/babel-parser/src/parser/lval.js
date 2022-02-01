@@ -99,10 +99,7 @@ export default class LValParser extends NodeUtils {
         // i.e. `([(a) = []] = []) => {}`
         // see also `recordParenthesizedIdentifierError` signature in packages/babel-parser/src/util/expression-scope.js
         if (parenthesized.type === "Identifier") {
-          this.expressionScope.recordParenthesizedIdentifierError(
-            Errors.InvalidParenthesizedAssignment,
-            node.loc.start,
-          );
+          this.expressionScope.recordParenthesizedIdentifierError({ at: node });
         } else if (parenthesized.type !== "MemberExpression") {
           // A parenthesized member expression can be in LHS but not in pattern.
           // If the LHS is later interpreted as a pattern, `checkLVal` will throw for member expression binding
