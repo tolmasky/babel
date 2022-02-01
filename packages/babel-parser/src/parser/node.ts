@@ -1,5 +1,3 @@
-// @flow
-
 import type Parser from "./index";
 import UtilParser from "./util";
 import { SourceLocation, type Position } from "../util/location";
@@ -28,6 +26,8 @@ class Node implements NodeBase {
 }
 const NodePrototype = Node.prototype;
 
+// FIXME!!!!
+/*
 if (!process.env.BABEL_8_BREAKING) {
   // $FlowIgnore
   NodePrototype.__clone = function (): Node {
@@ -48,7 +48,7 @@ if (!process.env.BABEL_8_BREAKING) {
 
     return newNode;
   };
-}
+}*/
 
 function clonePlaceholder(node: any): any {
   return cloneIdentifier(node);
@@ -95,30 +95,28 @@ export function cloneStringLiteral(node: any): any {
 }
 
 export class NodeUtils extends UtilParser {
-  startNode<T: NodeType>(): T {
-    // $FlowIgnore
-    return new Node(this, this.state.start, this.state.startLoc);
+  startNode<T extends NodeType>(): T {
+    return new Node(this, this.state.start, this.state.startLoc) as NodeType;
   }
 
-  startNodeAt<T: NodeType>(pos: number, loc: Position): T {
-    // $FlowIgnore
-    return new Node(this, pos, loc);
+  startNodeAt<T extends NodeType>(pos: number, loc: Position): T {
+    return new Node(this, pos, loc) as NodeType;
   }
 
   /** Start a new node with a previous node's location. */
-  startNodeAtNode<T: NodeType>(type: NodeType): T {
-    return this.startNodeAt(type.start, type.loc.start);
+  startNodeAtNode<T extends NodeType>(type: NodeType): T {
+    return this.startNodeAt(type.start, type.loc.start) as NodeType;
   }
 
   // Finish an AST node, adding `type` and `end` properties.
 
-  finishNode<T: NodeType>(node: T, type: string): T {
+  finishNode<T extends NodeType>(node: T, type: string): T {
     return this.finishNodeAt(node, type, this.state.lastTokEndLoc);
   }
 
   // Finish node at given position
 
-  finishNodeAt<T: NodeType>(node: T, type: string, endLoc: Position): T {
+  finishNodeAt<T extends NodeType>(node: T, type: string, endLoc: Position): T {
     if (process.env.NODE_ENV !== "production" && node.end > 0) {
       throw new Error(
         "Do not call finishNode*() twice on the same node." +
@@ -141,7 +139,7 @@ export class NodeUtils extends UtilParser {
 
   resetEndLocation(
     node: NodeBase,
-    endLoc?: Position = this.state.lastTokEndLoc,
+    endLoc: Position = this.state.lastTokEndLoc,
   ): void {
     node.end = endLoc.index;
     node.loc.end = endLoc;
