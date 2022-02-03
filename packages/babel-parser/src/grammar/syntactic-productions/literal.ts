@@ -28,41 +28,41 @@ export type NumericLiteral =
 // https://tc39.es/ecma262/#prod-DecimalLiteral
 export type DecimalLiteral = LiteralProduction<
   number,
-  "NumericLiteral",
-  "DecimalLiteral"
+  "DecimalLiteral",
+  "NumericLiteral"
 >;
 
 // https://tc39.es/ecma262/#prod-DecimalIntegerLiteral
 export type DecimalBigIntegerLiteral = LiteralProduction<
   number,
-  "BigIntLiteral",
-  "DecimalBigIntegerLiteral"
+  "DecimalBigIntegerLiteral",
+  "BigIntLiteral"
 >;
 
 // https://tc39.es/ecma262/#prod-NonDecimalIntegerLiteral
 export type NonDecimalIntegerLiteral = LiteralProduction<
   number,
-  "NumericLiteral",
-  "NonDecimalIntegerLiteral"
+  "NonDecimalIntegerLiteral",
+  "NumericLiteral"
 >;
 
 // https://tc39.es/ecma262/#sec-literals-numeric-literals
 export type NonDecimalBigIntLiteral = LiteralProduction<
   BigInt,
-  "BigIntLiteral",
-  "NonDecimalBigIntegerLiteral"
+  "NonDecimalBigIntegerLiteral",
+  "BigIntLiteral"
 >;
 
 // https://tc39.es/ecma262/#prod-LegacyOctalIntegerLiteral
 export type LegacyOctalIntegerLiteral = LiteralProduction<
   number,
-  "NumericLiteral",
-  "LegacyOctalIntegerLiteral"
+  "LegacyOctalIntegerLiteral",
+  "NumericLiteral"
 >;
 
 // https://tc39.es/ecma262/#prod-RegularExpressionLiteral
 export interface RegularExpressionLiteral
-  extends SyntacticProduction<"RegExpLiteral", "RegularExpressionLiteral"> {
+  extends SyntacticProduction<"RegularExpressionLiteral", "RegExpLiteral"> {
   // FIXME: (?) Backwards compatibility: Babel currently always assigns a null
   // RegExpLiteral.extra.rawValue.
   extra?: Extra<undefined>;
@@ -79,9 +79,9 @@ export type StringLiteral = LiteralProduction<string>;
 
 type LiteralProduction<
   T,
-  type = `${Capitalize<typename<T>>}Literal`,
-  GrammarSymbol = type
-> = SyntacticProduction<type, GrammarSymbol> &
+  GrammarSymbol = `${Capitalize<typename<T>>}Literal`,
+  type = GrammarSymbol
+> = SyntacticProduction<GrammarSymbol, type> &
   (T extends null ? {} : { value: T; extra?: Extra<T> });
 
 interface Extra<T> {
