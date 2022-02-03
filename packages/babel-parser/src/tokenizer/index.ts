@@ -234,8 +234,11 @@ export default abstract class Tokenizer extends CommentsParser {
   lookahead(): LookaheadState {
     const old = this.state;
     // For performance we use a simpified tokenizer state structure
-    // $FlowIgnore
-    this.state = this.createLookaheadState(old);
+    // NOTE: TypeScript is correctly angry that this.state isn't a `State`, so
+    // the best solution for now is to tell it to just trust us that this is in
+    // fact a `State`. Ideally in the future we can type the methods that are OK
+    // with just a `LookaheadState` or something.
+    this.state = this.createLookaheadState(old) as State;
 
     this.isLookahead = true;
     this.nextToken();
@@ -310,7 +313,7 @@ export default abstract class Tokenizer extends CommentsParser {
     this.getTokenFromCode(this.codePointAtPos(this.state.pos));
   }
 
-  skipBlockComment(): N.CommentBlock | void {
+  skipBlockComment(): N.CommentBlock | undefined {
     let startLoc;
     if (!this.isLookahead) startLoc = this.state.curPosition();
     const start = this.state.pos;
@@ -342,12 +345,12 @@ export default abstract class Tokenizer extends CommentsParser {
       start,
       end: end + 2,
       loc: new SourceLocation(startLoc, this.state.curPosition()),
-    };
+    } as const;
     if (this.options.tokens) this.pushToken(comment);
     return comment;
   }
 
-  skipLineComment(startSkip: number): N.CommentLine | void {
+  skipLineComment(startSkip: number): N.CommentLine | undefined {
     const start = this.state.pos;
     let startLoc;
     if (!this.isLookahead) startLoc = this.state.curPosition();
@@ -372,9 +375,9 @@ export default abstract class Tokenizer extends CommentsParser {
       start,
       end,
       loc: new SourceLocation(startLoc, this.state.curPosition()),
-    };
+    } as const;
     if (this.options.tokens) this.pushToken(comment);
-    return comment;
+    return comment as N.CommentLine;
   }
 
   // Called at the start of the parse and after every token. Skips
@@ -382,7 +385,7 @@ export default abstract class Tokenizer extends CommentsParser {
 
   skipSpace(): void {
     const spaceStart = this.state.pos;
-    const comments = [];
+    const comments: N.Comment[] = [];
     loop: while (this.state.pos < this.length) {
       const ch = this.input.charCodeAt(this.state.pos);
       switch (ch) {
@@ -1539,7 +1542,7 @@ export default abstract class Tokenizer extends CommentsParser {
     ParsingError: T,
     { at, ...properties }: ConstructorParameters<T>[0],
   ) {
-    const loc = at instanceof Position ? at : at.loc;
+    const loc = at instanceof Position ? at : at.loc.start;
     const index = loc.index;
 
     if (this.state.strict && !this.state.strictErrors.has(index)) {

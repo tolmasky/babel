@@ -2,7 +2,7 @@
 import { Position } from "../util/location";
 import type { ErrorCode } from "./error-codes";
 import { ErrorCodes } from "./error-codes";
-import type { NodeBase } from "../types";
+import type * as N from "@babel/types";
 
 type ToMessage = (self: any) => string;
 
@@ -27,7 +27,7 @@ export interface ParsingError {
   reasonCode: string;
 };
 
-type Origin = { at: Position | NodeBase };
+type Origin = { at: Position | N.Node };
 type ParsingErrorConstructorProperties<T extends ToMessage> = Origin &
   Omit<Parameters<T>[0], "loc">;
 
@@ -46,8 +46,8 @@ const toParsingErrorClass = <T extends ToMessage>([key, toMessage]: [
 
     constructor({ at, ...rest }: ParsingErrorConstructorProperties<T>) {
       super();
-      this.loc = at instanceof Position ? at : at.loc;
-      Object.assign(this, { ...rest, pos: indexes.get(this.loc) });
+      this.loc = at instanceof Position ? at : at.loc.start;
+      Object.assign(this, { ...rest, pos: this.loc.index });
     }
 
     get message() {

@@ -7,7 +7,7 @@ import {
 } from "../tokenizer/types";
 import Tokenizer from "../tokenizer";
 import State from "../tokenizer/state";
-import type { Node } from "../types";
+import type * as N from "@babel/types";
 import { lineBreak, skipWhiteSpaceToLineBreak } from "../util/whitespace";
 import { isIdentifierChar } from "../util/identifier";
 import ScopeHandler from "../util/scope";
@@ -38,7 +38,7 @@ export default class UtilParser extends Tokenizer {
   // TODO
 
   addExtra(
-    node: Node,
+    node: N.Node,
     key: string,
     value: any,
     enumerable: boolean = true,
@@ -138,7 +138,7 @@ export default class UtilParser extends Tokenizer {
 
   // tryParse will clone parser state.
   // It is expensive and should be used with cautions
-  tryParse<T extends Node | readonly Node[]>(
+  tryParse<T extends N.Node | readonly N.Node[]>(
     fn: (abort: (node?: T) => never) => T,
     oldState: State = this.state.clone(),
   ):
@@ -252,7 +252,7 @@ export default class UtilParser extends Tokenizer {
    * Test if given node is a PrivateName
    * will be overridden in ESTree plugin
    */
-  isPrivateName(node: Node): boolean {
+  isPrivateName(node: N.Node): boolean {
     return node.type === "PrivateName";
   }
 
@@ -261,7 +261,7 @@ export default class UtilParser extends Tokenizer {
    * WITHOUT `#`
    * @see {@link https://tc39.es/ecma262/#sec-static-semantics-stringvalue}
    */
-  getPrivateNameSV(node: Node): string {
+  getPrivateNameSV(node: { id: N.Identifier }): string {
     return node.id.name;
   }
 
@@ -270,7 +270,7 @@ export default class UtilParser extends Tokenizer {
    * contains a private name as its property
    * It is overridden in ESTree plugin
    */
-  hasPropertyAsPrivateName(node: Node): boolean {
+  hasPropertyAsPrivateName(node: N.Node): boolean {
     return (
       (node.type === "MemberExpression" ||
         node.type === "OptionalMemberExpression") &&
@@ -278,18 +278,19 @@ export default class UtilParser extends Tokenizer {
     );
   }
 
-  isOptionalChain(node: Node): boolean {
+  isOptionalChain(node: N.Node): boolean {
     return (
       node.type === "OptionalMemberExpression" ||
       node.type === "OptionalCallExpression"
     );
   }
 
-  isObjectProperty(node: Node): boolean {
+  isObjectProperty(node: N.Node): boolean {
     return node.type === "ObjectProperty";
   }
 
-  isObjectMethod(node: Node): boolean {
+  isObjectMethod(node: N.Node
+): boolean {
     return node.type === "ObjectMethod";
   }
 

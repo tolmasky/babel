@@ -23,12 +23,16 @@ export interface SourceLocation {
   start: {
     line: number;
     column: number;
+    index: number;
   };
 
   end: {
     line: number;
     column: number;
+    index: number;
   };
+  filename: string;
+  identifierName?: string;
 }
 
 interface BaseNode {
@@ -42,6 +46,8 @@ interface BaseNode {
   range?: [number, number];
   extra?: Record<string, unknown>;
 }
+
+export type NodeType = Node["type"];
 
 export type CommentTypeShorthand = "leading" | "inner" | "trailing";
 
@@ -579,6 +585,7 @@ export interface ObjectMethod extends BaseNode {
   generator?: boolean;
   async?: boolean;
   decorators?: Array<Decorator> | null;
+  method: true;
   returnType?: TypeAnnotation | TSTypeAnnotation | Noop | null;
   typeParameters?:
     | TypeParameterDeclaration
@@ -594,6 +601,7 @@ export interface ObjectProperty extends BaseNode {
   computed: boolean;
   shorthand: boolean;
   decorators?: Array<Decorator> | null;
+  method: false
 }
 
 export interface RestElement extends BaseNode {

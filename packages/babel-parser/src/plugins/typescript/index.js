@@ -2016,7 +2016,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
     }
 
     parseAssignableListItem(
-      allowModifiers: ?boolean,
+      allowModifiers: boolean,
       decorators: N.Decorator[],
     ): N.Pattern | N.TSParameterProperty {
       // Store original location/position to include modifiers in range

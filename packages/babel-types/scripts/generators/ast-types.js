@@ -27,12 +27,17 @@ export interface SourceLocation {
   start: {
     line: number;
     column: number;
+    index: number;
   };
 
   end: {
     line: number;
     column: number;
+    index: number;
   };
+
+  filename: string;
+  identifierName: string | null | undefined;
 }
 
 interface BaseNode {
@@ -48,6 +53,8 @@ interface BaseNode {
 }
 
 export type CommentTypeShorthand = "leading" | "inner" | "trailing";
+
+export type NodeType = Node["type"];
 
 export type Node = ${t.TYPES.filter(k => !t.FLIPPED_ALIAS_KEYS[k])
     .sort()

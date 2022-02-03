@@ -21,7 +21,7 @@ export class SourceLocation {
   start: Position;
   end: Position;
   filename: string;
-  identifierName: string | null | undefined;
+  identifierName?: string;
 
   constructor(start: Position, end?: Position) {
     this.start = start;

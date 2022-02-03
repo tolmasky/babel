@@ -1,7 +1,7 @@
 /*:: declare var invariant; */
 
 import BaseParser from "./base";
-import type { Comment, Node } from "../types";
+import type { Comment, Node } from "@babel/types";
 import * as charCodes from "charcodes";
 
 /**
@@ -37,7 +37,7 @@ function setTrailingComments(node: Node, comments: Comment[]) {
   if (node.trailingComments === undefined) {
     node.trailingComments = comments;
   } else {
-    node.trailingComments.unshift(...comments);
+    (node.trailingComments as Comment[]).unshift(...comments);
   }
 }
 
@@ -53,7 +53,7 @@ function setLeadingComments(node: Node, comments: Comment[]) {
   if (node.leadingComments === undefined) {
     node.leadingComments = comments;
   } else {
-    node.leadingComments.unshift(...comments);
+    (node.leadingComments as Comment[]).unshift(...comments);
   }
 }
 
@@ -69,7 +69,7 @@ export function setInnerComments(node: Node, comments: Comment[]) {
   if (node.innerComments === undefined) {
     node.innerComments = comments;
   } else {
-    node.innerComments.unshift(...comments);
+    (node.innerComments as Comment[]).unshift(...comments);
   }
 }
 

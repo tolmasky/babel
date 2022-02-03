@@ -1,8 +1,8 @@
 import { Position } from "./location";
 import Tokenizer from "../tokenizer";
-import { NodeBase } from "../types";
 import type { DeferredErrorDescriptionMap } from "../parser/error";
 import Errors from "../parser/errors";
+import type * as N from "@babel/types";
 
 /*:: declare var invariant; */
 /**
@@ -96,7 +96,7 @@ class ArrowHeadParsingScope extends ExpressionScope {
     ParsingError: T,
     { at, ...properties }: ConstructorParameters<T>[0],
   ) {
-    const loc = at instanceof Position ? at : at.loc;
+    const loc = at instanceof Position ? at : at.loc.start;
     const index = loc.index;
 
     this.declarationErrors.set(index, [ParsingError, { at, ...properties }]);
@@ -138,7 +138,7 @@ export default class ExpressionScopeHandler {
    */
   recordParameterInitializerError(
     ParsingError: ArrowHeadParsingParameterInitializerErrorClass,
-    properties: { at: NodeBase }
+    properties: { at: N.Node }
   ): void {
     const { stack } = this;
     let i = stack.length - 1;
@@ -178,7 +178,7 @@ export default class ExpressionScopeHandler {
    * @returns {void}
    * @memberof ExpressionScopeHandler
    */
-  recordParenthesizedIdentifierError(properties: { at: NodeBase }): void {
+  recordParenthesizedIdentifierError(properties: { at: N.Node }): void {
     const { stack } = this;
     const scope: ExpressionScope = stack[stack.length - 1];
     if (scope.isCertainlyParameterDeclaration()) {
@@ -217,8 +217,8 @@ export default class ExpressionScopeHandler {
     if (!currentScope.canBeArrowParameterDeclaration()) return;
     /*:: invariant(currentScope instanceof ArrowHeadParsingScope) */
     currentScope.iterateErrors(([ParsingError, { at, ...properties }]) => {
-      const loc = at instanceof Position ? at : at.loc;
-      const index: number = indexes.get(loc);
+      const loc = at instanceof Position ? at : at.loc.start;
+      const index = loc.index;
 
       this.parser.raise(ParsingError, { at, ...properties });
       // iterate from parent scope

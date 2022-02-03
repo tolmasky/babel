@@ -56,4 +56,4 @@ export default class BaseParser {
   }
 }
 
-export type PluginConfig = string | [string, { string: any }];
+export type PluginConfig = string | [string, { [key: string]: any }];

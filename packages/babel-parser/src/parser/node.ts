@@ -1,11 +1,12 @@
 import type Parser from "./index";
 import UtilParser from "./util";
 import { SourceLocation, type Position } from "../util/location";
-import type { Comment, Node as NodeType, NodeBase } from "../types";
+//import type { Comment, Node as NodeType, NodeBase } from "../types";
+import type * as N from "@babel/types";
 
 // Start an AST node, attaching a start offset.
 
-class Node implements NodeBase {
+class Node {
   constructor(parser: Parser, pos: number, loc: Position) {
     this.start = pos;
     this.end = 0;
@@ -13,15 +14,14 @@ class Node implements NodeBase {
     if (parser?.options.ranges) this.range = [pos, 0];
     if (parser?.filename) this.loc.filename = parser.filename;
   }
-
   type: string = "";
   declare start: number;
   declare end: number;
   declare loc: SourceLocation;
   declare range: [number, number];
-  declare leadingComments: Array<Comment>;
-  declare trailingComments: Array<Comment>;
-  declare innerComments: Array<Comment>;
+  declare leadingComments: Array<N.Comment>;
+  declare trailingComments: Array<N.Comment>;
+  declare innerComments: Array<N.Comment>;
   declare extra: { [key: string]: any };
 }
 const NodePrototype = Node.prototype;
@@ -95,28 +95,28 @@ export function cloneStringLiteral(node: any): any {
 }
 
 export class NodeUtils extends UtilParser {
-  startNode<T extends NodeType>(): T {
-    return new Node(this, this.state.start, this.state.startLoc) as NodeType;
+  startNode<T extends N.Node>(): T {
+    return (new Node(this, this.state.start, this.state.startLoc) as unknown) as T;
   }
 
-  startNodeAt<T extends NodeType>(pos: number, loc: Position): T {
-    return new Node(this, pos, loc) as NodeType;
+  startNodeAt<T extends N.Node>(pos: number, loc: Position): T {
+    return (new Node(this, pos, loc) as unknown) as T;
   }
 
   /** Start a new node with a previous node's location. */
-  startNodeAtNode<T extends NodeType>(type: NodeType): T {
-    return this.startNodeAt(type.start, type.loc.start) as NodeType;
+  startNodeAtNode<T extends N.Node>({ start, loc } : T): T {
+    return (this.startNodeAt(start, loc.start) as unknown) as T;
   }
 
   // Finish an AST node, adding `type` and `end` properties.
 
-  finishNode<T extends NodeType>(node: T, type: string): T {
-    return this.finishNodeAt(node, type, this.state.lastTokEndLoc);
+  finishNode<T extends N.Node>(node: T, type: N.NodeType): T {
+    return this.finishNodeAt(node, type, this.state.lastTokEndLoc) as T;
   }
 
   // Finish node at given position
 
-  finishNodeAt<T extends NodeType>(node: T, type: string, endLoc: Position): T {
+  finishNodeAt<T extends N.Node>(node: T, type: N.NodeType, endLoc: Position): T {
     if (process.env.NODE_ENV !== "production" && node.end > 0) {
       throw new Error(
         "Do not call finishNode*() twice on the same node." +
@@ -131,14 +131,14 @@ export class NodeUtils extends UtilParser {
     return node;
   }
 
-  resetStartLocation(node: NodeBase, start: number, startLoc: Position): void {
+  resetStartLocation(node: N.Node, start: number, startLoc: Position): void {
     node.start = start;
     node.loc.start = startLoc;
     if (this.options.ranges) node.range[0] = start;
   }
 
   resetEndLocation(
-    node: NodeBase,
+    node: N.Node,
     endLoc: Position = this.state.lastTokEndLoc,
   ): void {
     node.end = endLoc.index;
@@ -149,7 +149,7 @@ export class NodeUtils extends UtilParser {
   /**
    * Reset the start location of node to the start location of locationNode
    */
-  resetStartLocationFromNode(node: NodeBase, locationNode: NodeBase): void {
-    this.resetStartLocation(node, locationNode.start, locationNode.loc.start);
+  resetStartLocationFromNode(node: N.Node, { start, loc } : N.Node): void {
+    this.resetStartLocation(node, start, loc.start);
   }
 }

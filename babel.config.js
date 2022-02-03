@@ -640,7 +640,7 @@ function pluginImportMetaUrl({ types: t, template }) {
 }
 
 const tokenTypesMapping = new Map();
-const tokenTypeSourcePath = "./packages/babel-parser/src/tokenizer/types.js";
+const tokenTypeSourcePath = "./packages/babel-parser/src/tokenizer/types.ts";
 
 function pluginBabelParserTokenType({
   types: { isIdentifier, numericLiteral },

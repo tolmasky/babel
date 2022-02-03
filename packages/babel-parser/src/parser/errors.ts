@@ -66,9 +66,12 @@ export default toParsingErrorClasses({
     'A string literal cannot be used as an imported binding.\n- Did you mean `import { "%0" as foo }`?',
   ImportCallArgumentTrailingComma: () =>
     "Trailing comma is disallowed inside import(...) arguments.",
-  ImportCallArity: () => "`import()` requires exactly %0.",
+  ImportCallArity: ({ required } : { required: 1 | 2 }) =>
+    `\`import()\` requires exactly ${required === 1 ? "one argument" : "one or two arguments"}.`,
   ImportCallNotNewExpression: () => "Cannot use new with import(...).",
   ImportCallSpreadArgument: () => "`...` is not allowed in `import()`.",
+  IncompatibleRegExpUVFlags: () =>
+      "The 'u' and 'v' regular expression flags cannot be enabled at the same time.",
   InvalidBigIntLiteral: () => "Invalid BigIntLiteral.",
   InvalidCodePoint: () => "Code point out of bounds.",
   InvalidCoverInitializedName: () => "Invalid shorthand property initializer.",
@@ -139,8 +142,8 @@ export default toParsingErrorClasses({
   PatternHasAccessor: () => "Object pattern can't contain getter or setter.",
   PatternHasMethod: () => "Object pattern can't contain methods.",
   // This error is only used by the smart-mix proposal
-  PipeBodyIsTighter: () =>
-    "Unexpected %0 after pipeline body; any %0 expression acting as Hack-style pipe body must be parenthesized due to its loose operator precedence.",
+  PipeBodyIsTighter: ({ expressionDescription }: { expressionDescription: string }) =>
+    `Unexpected ${expressionDescription} after pipeline body; any ${expressionDescription} expression acting as Hack-style pipe body must be parenthesized due to its loose operator precedence.`,
   PipeTopicRequiresHackPipes: () =>
     'Topic reference is used, but the pipelineOperator plugin was not passed a "proposal": () => "hack" or "smart" option.',
   PipeTopicUnbound: () =>
@@ -149,8 +152,8 @@ export default toParsingErrorClasses({
     'Invalid topic token %0. In order to use %0 as a topic reference, the pipelineOperator plugin must be configured with { "proposal": () => "hack", "topicToken": () => "%0" }.',
   PipeTopicUnused: () =>
     "Hack-style pipe body does not contain a topic reference; Hack-style pipes must use topic at least once.",
-  PipeUnparenthesizedBody: () =>
-    "Hack-style pipe body cannot be an unparenthesized %0 expression; please wrap it in parentheses.",
+  PipeUnparenthesizedBody: ({ expressionDescription }: { expressionDescription: string }) =>
+    `Hack-style pipe body cannot be an unparenthesized ${expressionDescription} expression; please wrap it in parentheses.`,
 
   // Messages whose codes start with “Pipeline” or “PrimaryTopic”
   // are retained for backwards compatibility
@@ -169,8 +172,8 @@ export default toParsingErrorClasses({
   PrimaryTopicRequiresSmartPipeline: () =>
     'Topic reference is used, but the pipelineOperator plugin was not passed a "proposal": () => "hack" or "smart" option.',
 
-  PrivateInExpectedIn: () =>
-    "Private names are only allowed in property accesses (`obj.#%0`) or in `in` expressions (`#%0 in obj`).",
+  PrivateInExpectedIn: ({ name }: { name: string }) =>
+    `Private names are only allowed in property accesses (\`obj.#${name}\`) or in \`in\` expressions (\`#${name} in obj\`).`,
   PrivateNameRedeclaration: ({ name }: { name: string }) => `Duplicate private name #${name}.`,
   RecordExpressionBarIncorrectEndSyntaxType: () =>
     "Record expressions ending with '|}' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'bar'.",
@@ -220,7 +223,8 @@ export default toParsingErrorClasses({
   UnexpectedNumericSeparator: () =>
     "A numeric separator is only allowed between two digits.",
   UnexpectedPrivateField: () => "Unexpected private name.",
-  UnexpectedReservedWord: () => "Unexpected reserved word '%0'.",
+  UnexpectedReservedWord:
+    ({ reservedWord }: { reservedWord: string }) => `Unexpected reserved word '${reservedWord}'.`,
   UnexpectedSuper: () => "'super' is only allowed in object methods and classes.",
   UnexpectedToken: ({ loc: { line, column }, expected } : { loc: Position, expected?: string }) =>
     !!expected
