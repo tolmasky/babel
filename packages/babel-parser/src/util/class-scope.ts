@@ -4,8 +4,8 @@ import {
 } from "./scopeflags";
 import type { ClassElementTypes } from "./scopeflags";
 
-import { Position } from "./location";
-import Errors from "../parser/errors";
+import { Position } from "../grammar";
+import { Errors } from "../parse-error";
 import Tokenizer from "../tokenizer";
 
 export class ClassScope {

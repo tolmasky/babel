@@ -1,9 +1,16 @@
 /*:: declare var invariant; */
 
 import type { Options } from "../options";
-import { Position, createPositionWithColumnOffset } from "../util/location";
+import {
+  Position,
+  SourceLocation,
+  Comment,
+  MultiLineComment,
+  SingleLineComment,
+  SyntacticNode,
+  createPositionWithColumnOffset
+} from "../grammar";
 import CommentsParser from "../parser/comments";
-import * as N from "../types";
 import * as charCodes from "charcodes";
 import { isIdentifierStart, isIdentifierChar } from "../util/identifier";
 import {
@@ -14,9 +21,7 @@ import {
 } from "./types";
 import type { TokenType } from "./types";
 import type { TokContext } from "./context";
-import type { ParsingErrorClass } from "../parser/error";
-import Errors from "../parser/errors";
-import { SourceLocation } from "../util/location";
+import { Errors, type ParseErrorClass } from "../parse-error";
 import {
   lineBreak,
   lineBreakG,
@@ -25,7 +30,7 @@ import {
   skipWhiteSpace,
 } from "../util/whitespace";
 import State from "./state";
-import type { LookaheadState, StrictParsingErrorClass } from "./state";
+import type { LookaheadState, DeferredStrictErrorClass } from "./state";
 
 const VALID_REGEX_FLAGS = new Set([
   charCodes.lowercaseG,
@@ -132,7 +137,7 @@ export default abstract class Tokenizer extends CommentsParser {
   state: State = new State();
 
   // Token store.
-  tokens: (Token | N.Comment)[] = [];
+  tokens: (Token | Comment)[] = [];
 
   constructor(options: Options, input: string) {
     super();
@@ -147,7 +152,7 @@ export default abstract class Tokenizer extends CommentsParser {
     );
   }
 
-  pushToken(token: Token | N.Comment) {
+  pushToken(token: Token | Comment) {
     // Pop out invalid tokens trapped by try-catch parsing.
     // Those parsing branches are mainly created by typescript and flow plugins.
     this.tokens.length = this.state.tokensLength;
@@ -313,7 +318,7 @@ export default abstract class Tokenizer extends CommentsParser {
     this.getTokenFromCode(this.codePointAtPos(this.state.pos));
   }
 
-  skipBlockComment(): N.CommentBlock | undefined {
+  skipBlockComment(): MultiLineComment | undefined {
     let startLoc;
     if (!this.isLookahead) startLoc = this.state.curPosition();
     const start = this.state.pos;
@@ -345,12 +350,12 @@ export default abstract class Tokenizer extends CommentsParser {
       start,
       end: end + 2,
       loc: new SourceLocation(startLoc, this.state.curPosition()),
-    } as const;
+    } as MultiLineComment;
     if (this.options.tokens) this.pushToken(comment);
     return comment;
   }
 
-  skipLineComment(startSkip: number): N.CommentLine | undefined {
+  skipLineComment(startSkip: number): SingleLineComment | undefined {
     const start = this.state.pos;
     let startLoc;
     if (!this.isLookahead) startLoc = this.state.curPosition();
@@ -375,9 +380,9 @@ export default abstract class Tokenizer extends CommentsParser {
       start,
       end,
       loc: new SourceLocation(startLoc, this.state.curPosition()),
-    } as const;
+    } as SingleLineComment;
     if (this.options.tokens) this.pushToken(comment);
-    return comment as N.CommentLine;
+    return comment;
   }
 
   // Called at the start of the parse and after every token. Skips
@@ -385,7 +390,7 @@ export default abstract class Tokenizer extends CommentsParser {
 
   skipSpace(): void {
     const spaceStart = this.state.pos;
-    const comments: N.Comment[] = [];
+    const comments: Comment[] = [];
     loop: while (this.state.pos < this.length) {
       const ch = this.input.charCodeAt(this.state.pos);
       switch (ch) {
@@ -1538,7 +1543,7 @@ export default abstract class Tokenizer extends CommentsParser {
     }
   }
 
-  recordStrictModeErrors<T extends StrictParsingErrorClass>(
+  recordStrictModeErrors<T extends DeferredStrictErrorClass>(
     ParsingError: T,
     { at, ...properties }: ConstructorParameters<T>[0],
   ) {
@@ -1745,7 +1750,7 @@ export default abstract class Tokenizer extends CommentsParser {
     }
   }
 
-  raise<T extends ParsingErrorClass<any> >(
+  raise<T extends ParseErrorClass<any> >(
     ParsingError: T,
     properties: ConstructorParameters<T>[0],
   ) {
