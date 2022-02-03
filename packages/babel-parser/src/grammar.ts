@@ -2,14 +2,12 @@ export * from "./grammar/source-location";
 
 export * from "./grammar/lexical-productions/comment";
 
-export * from "./grammar/syntactic-productions/array-literal";
-export * from "./grammar/syntactic-productions/literal";
-export * from "./grammar/syntactic-productions/identifier";
-export * from "./grammar/syntactic-productions/decorator";
+export * from "./grammar/syntactic-productions/statement";
+export * from "./grammar/syntactic-productions/expression";
 
-import type Literal from "./grammar/syntactic-productions/literal";
-import type Decorator from "./grammar/syntactic-productions/decorator";
+import Statement from "./grammar/syntactic-productions/statement";
+import Expression from "./grammar/syntactic-productions/expression";
 
 export type SyntacticNode =
-    | Literal
-    | Decorator
+    | Statement
+    | Expression;
