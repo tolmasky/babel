@@ -1,18 +1,19 @@
 import type { Options } from "../options";
-import * as N from "../types";
+
+import { type Decorator, type Comment, Position } from "../grammar";
+import type { ParseError, DeferredParseErrorMap } from "../parse-error";
+import StrictErrors from "../parse-error/strict-mode";
+
 import type { CommentWhitespace } from "../parser/comments";
-import { Position } from "../util/location";
 
 import { types as ct } from "./context";
 import type { TokContext } from "./context";
 import { tt } from "./types";
 import type { TokenType } from "./types";
-import type { ParsingError, ParsingErrorClass, DeferredErrorDescriptionMap } from "../parser/error";
-import Errors from "../parser/errors";
 
-export type StrictParsingErrorClass =
-    | typeof Errors.StrictNumericEscape
-    | typeof Errors.StrictOctalLiteral;
+export type DeferredStrictErrorClass =
+    | typeof StrictErrors.StrictNumericEscape
+    | typeof StrictErrors.StrictOctalLiteral;
 
 type TopicContextState = {
   // When a topic binding has been currently established,
@@ -50,7 +51,7 @@ export default class State {
     this.startLoc = this.endLoc = new Position(startLine, startColumn, 0);
   }
 
-  errors: ParsingError[] = [];
+  errors: ParseError[] = [];
 
   // Used to signify the start of a potential arrow function
   potentialArrowAt: number = -1;
@@ -97,13 +98,13 @@ export default class State {
   // Leading decorators. Last element of the stack represents the decorators in current context.
   // Supports nesting of decorators, e.g. @foo(@bar class inner {}) class outer {}
   // where @foo belongs to the outer class and @bar to the inner
-  decoratorStack: N.Decorator[][] = [[]];
+  decoratorStack: Decorator[][] = [[]];
 
   // Comment store for Program.comments
-  comments: Array<N.Comment> = [];
+  comments: Comment[] = [];
 
   // Comment attachment store
-  commentStack: Array<CommentWhitespace> = [];
+  commentStack: CommentWhitespace[] = [];
 
   // The current position of the tokenizer in the input.
   pos: number = 0;
@@ -146,7 +147,7 @@ export default class State {
   // todo(JLHwung): set strictErrors to null and avoid recording string errors
   // after a non-directive is parsed
   //strictErrors: Map<number, UnraisedStrictParsingError> = new Map();
-  strictErrors: DeferredErrorDescriptionMap<StrictParsingErrorClass> = new Map();
+  strictErrors: DeferredParseErrorMap<DeferredStrictErrorClass> = new Map();
 
   // Tokens length in token store
   tokensLength: number = 0;

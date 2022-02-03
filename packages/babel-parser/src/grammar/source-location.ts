@@ -1,20 +1,13 @@
 export type Pos = {
-  start: number,
+  start: number;
 };
 
-// These are used when `options.locations` is on, for the
-// `startLoc` and `endLoc` properties.
-
 export class Position {
-  line: number;
-  column: number;
-  index: number;
-
-  constructor(line: number, col: number, index: number) {
-    this.line = line;
-    this.column = col;
-    this.index = index;
-  }
+  constructor(
+    public line: number,
+    public column: number,
+    public index: number
+  ) {}
 }
 
 export class SourceLocation {
@@ -25,10 +18,11 @@ export class SourceLocation {
 
   constructor(start: Position, end?: Position) {
     this.start = start;
-    // $FlowIgnore (may start as null, but initialized later)
     this.end = end;
   }
 }
+
+export default SourceLocation;
 
 /**
  * creates a new position with a non-zero column offset from the given position.
@@ -43,7 +37,7 @@ export class SourceLocation {
  */
 export function createPositionWithColumnOffset(
   position: Position,
-  columnOffset: number,
+  columnOffset: number
 ) {
   const { line, column, index } = position;
   return new Position(line, column + columnOffset, index + columnOffset);

@@ -1,4 +1,4 @@
-import type { SourceLocation } from "../util/location";
+import type SourceLocation from "./source-location";
 
 const ECMAScriptGrammarSymbol = Symbol("ECMAScript Grammar Symbol");
 
