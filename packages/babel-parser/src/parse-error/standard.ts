@@ -1,7 +1,7 @@
-import Position from "../grammar";
+import { Position } from "../grammar";
 import { toParseErrorClasses } from "../parse-error";
-import type { TokenType } from "../../tokenizer/types";
-import { tokenLabelName } from "../../tokenizer/types";
+import { type TokenType, tokenLabelName } from "../tokenizer/types";
+
 
 export default toParseErrorClasses({
   AccessorIsGenerator: () => "A %0ter cannot be a generator.",

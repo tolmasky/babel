@@ -78,3 +78,8 @@ export type DeferredParseErrorMap<T extends ParseErrorClass<any>> = Map<
   number,
   DeferredErrorDescription<T>
 >;
+
+import StandardErrors from "./parse-error/standard";
+import StrictErrors from "./parse-error/strict-mode";
+
+export const Errors = { ...StandardErrors, ...StrictErrors };

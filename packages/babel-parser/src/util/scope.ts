@@ -1,4 +1,3 @@
-// @flow
 import {
   SCOPE_ARROW,
   SCOPE_DIRECT_SUPER,
@@ -16,9 +15,8 @@ import {
 } from "./scopeflags";
 
 import type { ScopeFlags, BindingTypes } from "./scopeflags";
-import { Position } from "./location";
-import * as N from "../types";
-import Errors from "../parser/errors";
+import { type Identifier, Position } from "../grammar";
+import { Errors } from "../parse-error";
 import Tokenizer from "../tokenizer";
 
 
@@ -196,7 +194,7 @@ export default class ScopeHandler {
     );
   }
 
-  checkLocalExport(id: N.Identifier) {
+  checkLocalExport(id: Identifier) {
     const { name } = id;
     const topLevelScope = this.scopeStack[0];
     if (

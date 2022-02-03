@@ -6,10 +6,8 @@ import StrictErrors from "../parse-error/strict-mode";
 
 import type { CommentWhitespace } from "../parser/comments";
 
-import { types as ct } from "./context";
-import type { TokContext } from "./context";
-import { tt } from "./types";
-import type { TokenType } from "./types";
+import { types as ct, type TokContext } from "./context";
+import { tt, type TokenType } from "./types";
 
 export type DeferredStrictErrorClass =
     | typeof StrictErrors.StrictNumericEscape
