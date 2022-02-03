@@ -1,7 +1,7 @@
 /*:: declare var invariant; */
 
 import BaseParser from "./base";
-import type { Comment, Node } from "@babel/types";
+import { Comment, SyntacticNode } from "../grammar";
 import * as charCodes from "charcodes";
 
 /**
@@ -20,9 +20,9 @@ export type CommentWhitespace = {
   start: number;
   end: number;
   comments: Comment[];
-  leadingNode: Node | null;
-  trailingNode: Node | null;
-  containingNode: Node | null;
+  leadingNode: SyntacticNode | null;
+  trailingNode: SyntacticNode | null;
+  containingNode: SyntacticNode | null;
 };
 
 /**
@@ -33,7 +33,7 @@ export type CommentWhitespace = {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-function setTrailingComments(node: Node, comments: Comment[]) {
+function setTrailingComments(node: SyntacticNode, comments: Comment[]) {
   if (node.trailingComments === undefined) {
     node.trailingComments = comments;
   } else {
@@ -49,7 +49,7 @@ function setTrailingComments(node: Node, comments: Comment[]) {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-function setLeadingComments(node: Node, comments: Comment[]) {
+function setLeadingComments(node: SyntacticNode, comments: Comment[]) {
   if (node.leadingComments === undefined) {
     node.leadingComments = comments;
   } else {
@@ -65,7 +65,7 @@ function setLeadingComments(node: Node, comments: Comment[]) {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-export function setInnerComments(node: Node, comments: Comment[]) {
+export function setInnerComments(node: SyntacticNode, comments: Comment[]) {
   if (node.innerComments === undefined) {
     node.innerComments = comments;
   } else {
@@ -83,8 +83,8 @@ export function setInnerComments(node: Node, comments: Comment[]) {
  * @param {Array<Comment>} comments
  */
 function adjustInnerComments(
-  node: Node,
-  elements: Node[],
+  node: SyntacticNode,
+  elements: SyntacticNode[],
   commentWS: CommentWhitespace,
 ) {
   let lastElement = null;
@@ -114,7 +114,7 @@ export default class CommentsParser extends BaseParser {
    * @returns {void}
    * @memberof CommentsParser
    */
-  processComment(node: Node): void {
+  processComment(node: SyntacticNode): void {
     const { commentStack } = this.state;
     const commentStackLength = commentStack.length;
     if (commentStackLength === 0) return;
@@ -244,7 +244,7 @@ export default class CommentsParser extends BaseParser {
    * @returns
    * @memberof CommentsParser
    */
-  resetPreviousNodeTrailingComments(node: Node) {
+  resetPreviousNodeTrailingComments(node: SyntacticNode) {
     const { commentStack } = this.state;
     const { length } = commentStack;
     if (length === 0) return;
@@ -265,7 +265,7 @@ export default class CommentsParser extends BaseParser {
    * @param {number} start
    * @param {number} end
    */
-  takeSurroundingComments(node: Node, start: number, end: number) {
+  takeSurroundingComments(node: SyntacticNode, start: number, end: number) {
     const { commentStack } = this.state;
     const commentStackLength = commentStack.length;
     if (commentStackLength === 0) return;

@@ -1,4 +1,8 @@
-import type { Position } from "../util/location";
+import {
+  Position,
+  SyntacticNode,
+} from "../grammar";
+import { Errors, ParseErrorClass } from "../parse-error";
 import {
   tokenIsLiteralPropertyName,
   tokenLabelName,
@@ -7,7 +11,6 @@ import {
 } from "../tokenizer/types";
 import Tokenizer from "../tokenizer";
 import State from "../tokenizer/state";
-import type * as N from "@babel/types";
 import { lineBreak, skipWhiteSpaceToLineBreak } from "../util/whitespace";
 import { isIdentifierChar } from "../util/identifier";
 import ScopeHandler from "../util/scope";
@@ -18,9 +21,7 @@ import ProductionParameterHandler, {
   PARAM_AWAIT,
   PARAM,
 } from "../util/production-parameter";
-import Errors from "./errors";
 
-import type { ParsingError, ParsingErrorClass } from "./error";
 import type { PluginConfig } from "./base";
 
 type TryParse<Node, Error, Thrown, Aborted, FailState> = {
@@ -38,7 +39,7 @@ export default class UtilParser extends Tokenizer {
   // TODO
 
   addExtra(
-    node: N.Node,
+    node: SyntacticNode,
     key: string,
     value: any,
     enumerable: boolean = true,
@@ -91,10 +92,10 @@ export default class UtilParser extends Tokenizer {
 
   // Asserts that following token is given contextual keyword.
 
-  expectContextual(token: TokenType, ParsingError?: ParsingErrorClass<any>): void {
+  expectContextual(token: TokenType, ParseError?: ParseErrorClass<any>): void {
     if (!this.eatContextual(token)) {
-      if (ParsingError != null) {
-        throw this.raise(ParsingError, { at: this.state.startLoc });
+      if (ParseError != null) {
+        throw this.raise(ParseError, { at: this.state.startLoc });
       }
       throw this.unexpected(null, token);
     }
@@ -138,7 +139,7 @@ export default class UtilParser extends Tokenizer {
 
   // tryParse will clone parser state.
   // It is expensive and should be used with cautions
-  tryParse<T extends N.Node | readonly N.Node[]>(
+  tryParse<T extends SyntacticNode | readonly SyntacticNode[]>(
     fn: (abort: (node?: T) => never) => T,
     oldState: State = this.state.clone(),
   ):
@@ -252,10 +253,11 @@ export default class UtilParser extends Tokenizer {
    * Test if given node is a PrivateName
    * will be overridden in ESTree plugin
    */
-  isPrivateName(node: N.Node): boolean {
+/*
+  isPrivateName(node: SyntacticNode): boolean {
     return node.type === "PrivateName";
   }
-
+*/
   /*
    * Return the string value of a given private name
    * WITHOUT `#`
@@ -270,30 +272,29 @@ export default class UtilParser extends Tokenizer {
    * contains a private name as its property
    * It is overridden in ESTree plugin
    */
-  hasPropertyAsPrivateName(node: N.Node): boolean {
+  hasPropertyAsPrivateName(node: SyntacticNode): boolean {
     return (
       (node.type === "MemberExpression" ||
         node.type === "OptionalMemberExpression") &&
       this.isPrivateName(node.property)
     );
   }
-
-  isOptionalChain(node: N.Node): boolean {
+/*
+  isOptionalChain(node: SyntacticNode): boolean {
     return (
       node.type === "OptionalMemberExpression" ||
       node.type === "OptionalCallExpression"
     );
   }
 
-  isObjectProperty(node: N.Node): boolean {
+  isObjectProperty(node: SyntacticNode): boolean {
     return node.type === "ObjectProperty";
   }
 
-  isObjectMethod(node: N.Node
-): boolean {
+  isObjectMethod(node: SyntacticNode): boolean {
     return node.type === "ObjectMethod";
   }
-
+*/
   initializeScopes(
     inModule: boolean = this.options.sourceType === "module",
   ): () => void {
@@ -350,7 +351,7 @@ export default class UtilParser extends Tokenizer {
       this.expectPlugin("destructuringPrivate", privateKeyLoc);
     }
   }
-  
+
   // This can be overwritten, for example, by the TypeScript plugin.
   getScopeHandler(): typeof ScopeHandler {
     return ScopeHandler;
