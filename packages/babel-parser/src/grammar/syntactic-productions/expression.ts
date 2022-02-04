@@ -6,10 +6,24 @@ export type Expression =
     | ArrayLiteral
     | Literal
     | Decorator
+    | FunctionExpression
+    | GeneratorExpression
+    | AsyncFunctionExpression
+    | AsyncGeneratorExpression
+    | ArrowFunction;
 
 export default Expression;
+
+import {
+    FunctionExpression,
+    GeneratorExpression,
+    AsyncFunctionExpression,
+    AsyncGeneratorExpression,
+    ArrowFunction,
+} from "./function-expression";
 
 export * from "./array-literal";
 export * from "./literal";
 export * from "./identifier";
 export * from "./decorator";
+export * from "./function-expression";
