@@ -15,7 +15,7 @@ import {
 } from "./scopeflags";
 
 import type { ScopeFlags, BindingTypes } from "./scopeflags";
-import { type Identifier, Position } from "../grammar";
+import { BindingIdentifier, Position } from "../grammar";
 import { Errors } from "../parse-error";
 import Tokenizer from "../tokenizer";
 
@@ -194,7 +194,7 @@ export default class ScopeHandler {
     );
   }
 
-  checkLocalExport(id: Identifier) {
+  checkLocalExport(id: BindingIdentifier) {
     const { name } = id;
     const topLevelScope = this.scopeStack[0];
     if (
