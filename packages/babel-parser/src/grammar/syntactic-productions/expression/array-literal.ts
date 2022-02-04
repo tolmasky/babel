@@ -9,7 +9,7 @@ type AssignmentExpression = {};
 // I actually agree that this is a better name, but whatcha gonna do?
 export interface ArrayLiteral
   extends SyntacticProduction<"ArrayLiteral", "ArrayExpression"> {
-  argument: ElementList;
+  elements: ElementList;
 }
 
 export default ArrayLiteral;

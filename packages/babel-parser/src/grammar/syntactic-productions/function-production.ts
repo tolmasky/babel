@@ -12,7 +12,7 @@ export default interface ToFunctionProduction<GrammarSymbol, type, isGenerator, 
   id: IdentifierBinding | null;
   body: BlockStatement;
 
-  parameters: FormalParameters;
+  params: FormalParameters;
 
   generator: isGenerator;
   async: isAsync;

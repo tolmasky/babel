@@ -1,8 +1,6 @@
 import type Parser from "./index";
 import UtilParser from "./util";
-import { SourceLocation, type Position } from "../util/location";
-//import type { Comment, Node as NodeType, NodeBase } from "../types";
-import type * as N from "@babel/types";
+import { SourceLocation, Position, Comment, SyntacticNode } from "../grammar";
 
 // Start an AST node, attaching a start offset.
 
@@ -19,9 +17,9 @@ class Node {
   declare end: number;
   declare loc: SourceLocation;
   declare range: [number, number];
-  declare leadingComments: Array<N.Comment>;
-  declare trailingComments: Array<N.Comment>;
-  declare innerComments: Array<N.Comment>;
+  declare leadingComments: Comment[];
+  declare trailingComments: Comment[];
+  declare innerComments: Comment[];
   declare extra: { [key: string]: any };
 }
 const NodePrototype = Node.prototype;
@@ -95,28 +93,27 @@ export function cloneStringLiteral(node: any): any {
 }
 
 export class NodeUtils extends UtilParser {
-  startNode<T extends N.Node>(): T {
+  startNode<T extends SyntacticNode>(): T {
     return (new Node(this, this.state.start, this.state.startLoc) as unknown) as T;
   }
 
-  startNodeAt<T extends N.Node>(pos: number, loc: Position): T {
+  startNodeAt<T extends SyntacticNode>(pos: number, loc: Position): T {
     return (new Node(this, pos, loc) as unknown) as T;
   }
 
   /** Start a new node with a previous node's location. */
-  startNodeAtNode<T extends N.Node>({ start, loc } : T): T {
+  startNodeAtNode<T extends SyntacticNode>({ start, loc } : T): T {
     return (this.startNodeAt(start, loc.start) as unknown) as T;
   }
 
   // Finish an AST node, adding `type` and `end` properties.
 
-  finishNode<T extends N.Node>(node: T, type: N.NodeType): T {
+  finishNode<T extends SyntacticNode>(node: T, type: string): T {
     return this.finishNodeAt(node, type, this.state.lastTokEndLoc) as T;
   }
 
   // Finish node at given position
-
-  finishNodeAt<T extends N.Node>(node: T, type: N.NodeType, endLoc: Position): T {
+  finishNodeAt<T extends SyntacticNode>(node: T, type: typeof SyntacticNode["type"], endLoc: Position): T {
     if (process.env.NODE_ENV !== "production" && node.end > 0) {
       throw new Error(
         "Do not call finishNode*() twice on the same node." +
@@ -131,14 +128,14 @@ export class NodeUtils extends UtilParser {
     return node;
   }
 
-  resetStartLocation(node: N.Node, start: number, startLoc: Position): void {
+  resetStartLocation(node: SyntacticNode, start: number, startLoc: Position): void {
     node.start = start;
     node.loc.start = startLoc;
     if (this.options.ranges) node.range[0] = start;
   }
 
   resetEndLocation(
-    node: N.Node,
+    node: SyntacticNode,
     endLoc: Position = this.state.lastTokEndLoc,
   ): void {
     node.end = endLoc.index;
@@ -149,7 +146,7 @@ export class NodeUtils extends UtilParser {
   /**
    * Reset the start location of node to the start location of locationNode
    */
-  resetStartLocationFromNode(node: N.Node, { start, loc } : N.Node): void {
+  resetStartLocationFromNode(node: SyntacticNode, { start, loc } : SyntacticNode): void {
     this.resetStartLocation(node, start, loc.start);
   }
 }
