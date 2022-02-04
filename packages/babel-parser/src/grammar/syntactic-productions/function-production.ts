@@ -1,15 +1,14 @@
 import type SyntacticProduction from "../syntactic-production";
+import BindingIdentifier from "./bindings/binding-identifier";
+import { BindingElement, BindingRestElement } from "./bindings/binding-pattern";
 
-type IdentifierBinding = { };
-type BindingElement = {};
-type BindingRestParameter = { };
 type BlockStatement = { };
 
 
 export default interface ToFunctionProduction<GrammarSymbol, type, isGenerator, isAsync>
   extends SyntacticProduction<GrammarSymbol, type> {
   // This can be null in export default declarations.
-  id: IdentifierBinding | null;
+  id: BindingIdentifier | null;
   body: BlockStatement;
 
   params: FormalParameters;
@@ -19,7 +18,7 @@ export default interface ToFunctionProduction<GrammarSymbol, type, isGenerator, 
 }
 
 // https://tc39.es/ecma262/#prod-FormalParameters
-type FormalParameters = [...FormalParameter[], FunctionRestParameter];
+export type FormalParameters = [...FormalParameter[], FunctionRestParameter];
 
-type FormalParameter = BindingElement;
-type FunctionRestParameter = BindingRestParameter;
+export type FormalParameter = BindingElement;
+export type FunctionRestParameter = BindingRestElement;

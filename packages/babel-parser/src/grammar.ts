@@ -11,17 +11,22 @@ export * from "./grammar/syntactic-productions/bindings/binding-identifier";
 export * from "./grammar/syntactic-productions/bindings/binding-pattern";
 
 import BindingIdentifier from "./grammar/syntactic-productions/bindings/binding-identifier";
-import BindingPattern from "./grammar/syntactic-productions/bindings/binding-pattern";
+import { BindingPattern, AssignmentPattern, BindingRestElement, BindingRestProperty } from "./grammar/syntactic-productions/bindings/binding-pattern";
 import Statement from "./grammar/syntactic-productions/statement";
 import Expression from "./grammar/syntactic-productions/expression";
 import ExportDeclaration from "./grammar/syntactic-productions/export-declaration";
 
 import SpreadElement from "./grammar/syntactic-productions/expression/spread-element";
+import { FunctionRestParameter } from "./grammar/syntactic-productions/function-production";
 
 
 export type SyntacticNode =
   | BindingIdentifier
   | BindingPattern
+  | BindingRestElement
+  | FunctionRestParameter
+  | BindingRestProperty
+  | AssignmentPattern
   | ExportDeclaration
   | SpreadElement
   | Statement

@@ -34,11 +34,11 @@ export interface ArrayBindingPattern
   }
 
 // https://tc39.es/ecma262/#prod-BindingElementList
-type BindingElementList =
+export type BindingElementList =
   [...(BindingElement | BindingElisionElement)[], BindingRestElement];
 
 // https://tc39.es/ecma262/#prod-BindingElement
-type BindingElement =
+export type BindingElement =
   | SingleNameBinding
   | AssignmentPattern;
 

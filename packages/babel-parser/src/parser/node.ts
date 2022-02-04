@@ -108,12 +108,12 @@ export class NodeUtils extends UtilParser {
 
   // Finish an AST node, adding `type` and `end` properties.
 
-  finishNode<T extends SyntacticNode>(node: T, type: string): T {
+  finishNode<T extends SyntacticNode>(node: T, type: SyntacticNode["type"]): T {
     return this.finishNodeAt(node, type, this.state.lastTokEndLoc) as T;
   }
 
   // Finish node at given position
-  finishNodeAt<T extends SyntacticNode>(node: T, type: typeof SyntacticNode["type"], endLoc: Position): T {
+  finishNodeAt<T extends SyntacticNode>(node: T, type: SyntacticNode["type"], endLoc: Position): T {
     if (process.env.NODE_ENV !== "production" && node.end > 0) {
       throw new Error(
         "Do not call finishNode*() twice on the same node." +
