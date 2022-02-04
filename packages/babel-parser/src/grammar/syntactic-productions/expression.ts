@@ -1,10 +1,15 @@
-import type ArrayLiteral from "./array-literal";
+
+import type IdentifierReference from "./expression/identifier-reference";
 import type Literal from "./literal";
 import type Decorator from "./decorator";
+import type ArrayLiteral from "./expression/array-literal";
+import type ObjectLiteral from "./expression/object-literal";
 
 export type Expression =
-    | ArrayLiteral
+    | IdentifierReference
     | Literal
+    | ArrayLiteral
+    | ObjectLiteral
     | Decorator
     | FunctionExpression
     | GeneratorExpression
@@ -22,8 +27,9 @@ import {
     ArrowFunction,
 } from "./function-expression";
 
-export * from "./array-literal";
+export * from "./expression/identifier-reference";
+export * from "./expression/array-literal";
+export * from "./expression/object-literal";
 export * from "./literal";
-export * from "./identifier";
 export * from "./decorator";
 export * from "./function-expression";
