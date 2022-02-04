@@ -1,4 +1,4 @@
-import type FunctionProduction from "./function-production";
+import type FunctionProduction from "../function-production";
 
 type IdentifierBinding = { };
 type BindingElement = {};

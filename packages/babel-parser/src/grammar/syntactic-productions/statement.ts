@@ -1,8 +1,8 @@
-import HoistableDeclaration from "./hoistable-declaration";
+import Declaration from "./declaration";
 
 export type Statement =
-  | HoistableDeclaration;
+  | Declaration;
 
 export default Statement;
 
-export * from "./hoistable-declaration";
+export * from "./declaration";

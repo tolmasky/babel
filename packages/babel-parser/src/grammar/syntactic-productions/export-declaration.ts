@@ -1,5 +1,5 @@
 import SyntactiProduction from "../syntactic-production";
-import HoistableDeclaration from "./hoistable-declaration";
+import HoistableDeclaration from "./declaration/hoistable-declaration";
 
 export type ExportDeclaration =
   | ExportNamedDeclaration
