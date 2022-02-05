@@ -7,7 +7,6 @@ import {
   Comment,
   MultiLineComment,
   SingleLineComment,
-  SyntacticNode,
   createPositionWithColumnOffset
 } from "../grammar";
 import CommentsParser from "../parser/comments";
@@ -21,7 +20,7 @@ import {
 } from "./types";
 import type { TokenType } from "./types";
 import type { TokContext } from "./context";
-import { Errors, type ParseErrorClass } from "../parse-error";
+import { Errors, ParseErrorClass } from "../parse-error";
 import {
   lineBreak,
   lineBreakG,

@@ -19,7 +19,7 @@ import type {
   ObjectPattern,
 } from "@babel/types";
 import type * as N from "@babel/types";
-import { type Pos, Position } from "../util/location";
+import { Pos, Position } from "../grammar/source-location";
 import {
   isStrictBindOnlyReservedWord,
   isStrictBindReservedWord,
