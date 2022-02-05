@@ -1,11 +1,9 @@
-import type SyntacticProduction from "../../syntactic-production";
+import type SyntaxNode from "../../syntax-node";
 import IdentifierReference from "./identifier-reference";
 import SpreadElement from "./spread-element";
 
-type Expression = { };
-
 // https://tc39.es/ecma262/#prod-ObjectLiteral
-export interface ObjectLiteral extends SyntacticProduction<"ObjectLiteral", "ObjectExpression"> {
+export interface ObjectLiteral extends SyntaxNode<"ObjectLiteral", "ObjectExpression"> {
   properties: PropertyDefinitionList;
 };
 
@@ -16,8 +14,8 @@ type PropertyDefinitionList = PropertyDefinition[];
 
 // https://tc39.es/ecma262/#prod-PropertyDefinition
 type PropertyDefinition =
-    | IdentifierReference
-    | SpreadElement;
+  | IdentifierReference
+  | SpreadElement;
 
 // export type ObjectLiteralElement = ObjectProperty | ObjectMethod | SpreadElement;
 

@@ -1,23 +1,20 @@
 export * from "./grammar/source-location";
+export * from "./grammar/source-node";
 
-export * from "./grammar/lexical-productions/comment";
+/*
 
-export * from "./grammar/syntactic-productions/statement";
-export * from "./grammar/syntactic-productions/expression";
+import BindingIdentifier from "./grammar/syntax-node/bindings/binding-identifier";
+import { BindingPattern, AssignmentPattern, BindingRestElement, BindingRestProperty } from "./grammar/syntax-node/bindings/binding-pattern";
+import Statement from "./grammar/syntax-node/statement";
+import Expression from "./grammar/syntax-node/expression";
+import ExportDeclaration from "./grammar/syntax-node/export-declaration";
 
-export * from "./grammar/syntactic-productions/export-declaration";
+import SpreadElement from "./grammar/syntax-node/expression/spread-element";
+import { FunctionRestParameter } from "./grammar/syntax-node/function-production";
 
-export * from "./grammar/syntactic-productions/bindings/binding-identifier";
-export * from "./grammar/syntactic-productions/bindings/binding-pattern";
+import SyntacticProduction from "./grammar/syntactic-production";
 
-import BindingIdentifier from "./grammar/syntactic-productions/bindings/binding-identifier";
-import { BindingPattern, AssignmentPattern, BindingRestElement, BindingRestProperty } from "./grammar/syntactic-productions/bindings/binding-pattern";
-import Statement from "./grammar/syntactic-productions/statement";
-import Expression from "./grammar/syntactic-productions/expression";
-import ExportDeclaration from "./grammar/syntactic-productions/export-declaration";
-
-import SpreadElement from "./grammar/syntactic-productions/expression/spread-element";
-import { FunctionRestParameter } from "./grammar/syntactic-productions/function-production";
+export type SomeSyntaxNode = SyntacticProduction<string, any>;
 
 
 export type SyntacticNode =
@@ -31,3 +28,4 @@ export type SyntacticNode =
   | SpreadElement
   | Statement
   | Expression;
+*/

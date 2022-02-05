@@ -1,8 +1,8 @@
-import SyntacticProduction from "../../syntactic-production";
+import SyntaxNode from "../../syntax-node";
 
 // https://tc39.es/ecma262/#prod-LexicalDeclaration
 export interface LexicalDeclaration
-  extends SyntacticProduction<"LexicalDeclaration", "VariableDeclaration"> {
+  extends SyntaxNode<"LexicalDeclaration", "VariableDeclaration"> {
     kind: "let" | "const";
     // declarations: readonly VariableDeclarator[];
   };

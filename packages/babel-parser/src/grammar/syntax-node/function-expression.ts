@@ -1,7 +1,7 @@
-import type FunctionProduction from "./function-production";
+import type FunctionNode from "./function-node";
 
 export interface FunctionExpression
-  extends FunctionProduction<
+  extends FunctionNode<
     "FunctionExpression",
     "FunctionExpression",
     false,
@@ -9,7 +9,7 @@ export interface FunctionExpression
   > {}
 
 export interface GeneratorExpression
-  extends FunctionProduction<
+  extends FunctionNode<
     "GeneratorExpression",
     "FunctionExpression",
     true,
@@ -17,7 +17,7 @@ export interface GeneratorExpression
   > {}
 
 export interface AsyncGeneratorExpression
-  extends FunctionProduction<
+  extends FunctionNode<
     "AsyncGeneratorExpression",
     "FunctionExpression",
     true,
@@ -25,7 +25,7 @@ export interface AsyncGeneratorExpression
   > {}
 
 export interface AsyncFunctionExpression
-  extends FunctionProduction<
+  extends FunctionNode<
     "AsyncFunctionExpression",
     "FunctionExpression",
     false,
@@ -33,7 +33,7 @@ export interface AsyncFunctionExpression
   > {}
 
 export interface ArrowFunction
-  extends FunctionProduction<
+  extends FunctionNode<
     "ArrowFunction",
     "ArrowFunctionExpression",
     false,
@@ -41,7 +41,7 @@ export interface ArrowFunction
   > {}
 
 export interface AsyncArrowFunction
-  extends FunctionProduction<
+  extends FunctionNode<
     "ArrowFunction",
     "ArrowFunctionExpression",
     false,

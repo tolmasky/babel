@@ -263,10 +263,11 @@ export default class UtilParser extends Tokenizer {
    * WITHOUT `#`
    * @see {@link https://tc39.es/ecma262/#sec-static-semantics-stringvalue}
    */
+   /*
   getPrivateNameSV(node: { id: N.Identifier }): string {
     return node.id.name;
   }
-
+*/
   /*
    * Return whether the given node is a member/optional chain that
    * contains a private name as its property

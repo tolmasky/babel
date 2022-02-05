@@ -1,4 +1,4 @@
-import SyntacticProduction from "../../syntactic-production";
+import SyntaxNode from "../../syntax-node";
 import SpreadElement from "./spread-element"; 
 
 type AssignmentExpression = {};
@@ -8,7 +8,7 @@ type AssignmentExpression = {};
 // BABEL-ECMA-BRIDGE-NOTE: In Babel, we call `ArrayLiteral`s `ArrayExpression`s.
 // I actually agree that this is a better name, but whatcha gonna do?
 export interface ArrayLiteral
-  extends SyntacticProduction<"ArrayLiteral", "ArrayExpression"> {
+  extends SyntaxNode<"ArrayLiteral", "ArrayExpression"> {
   elements: ElementList;
 }
 
@@ -29,6 +29,6 @@ type ArrayLiteralElement = Elision | AssignmentExpression | SpreadElement;
 //
 // NOTE: This is unfortunate, as we'd much prefer this to be an actual object.
 // I tried using the same trick as with the ECMAScript grammar bridge, but
-// unfortunately `null & SyntacticProduction<"Elision">` results in `never`,
+// unfortunately `null & SyntaxNode<Elision>` results in `never`,
 // so it doesn't work. 
 export type Elision = null;

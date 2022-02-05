@@ -1,4 +1,4 @@
-import { type SyntacticNode, Position } from "./grammar";
+import { SomeSyntaxNode, Position } from "./grammar";
 
 export enum ParserErrorCode {
   SyntaxError =  "BABEL_PARSER_SYNTAX_ERROR",
@@ -23,7 +23,7 @@ export interface ParseError {
   reasonCode: string;
 }
 
-type Origin = { at: Position | SyntacticNode };
+type Origin = { at: Position | SomeSyntaxNode };
 type ParseErrorConstructorProperties<T extends ToMessage> = Origin &
   Omit<Parameters<T>[0], "loc">;
 

@@ -2,7 +2,7 @@ import type SourceLocation from "./source-location";
 
 const ECMAScriptGrammarSymbol = Symbol("ECMAScript Grammar Symbol");
 
-export default interface Production<GrammarSymbol, type = GrammarSymbol> {
+export interface SourceNode<GrammarSymbol, type = GrammarSymbol> {
   [ECMAScriptGrammarSymbol]: GrammarSymbol;
   type: type;
 
@@ -11,3 +11,8 @@ export default interface Production<GrammarSymbol, type = GrammarSymbol> {
   loc: SourceLocation;
   range?: [number, number];
 }
+
+export default SourceNode;
+
+export * from "./comment";
+export * from "./syntax-node";

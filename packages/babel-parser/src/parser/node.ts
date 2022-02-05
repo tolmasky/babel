@@ -1,6 +1,6 @@
 import type Parser from "./index";
 import UtilParser from "./util";
-import { SourceLocation, Position, Comment, SyntacticNode } from "../grammar";
+import { SourceLocation, Position, Comment, SomeSyntaxNode } from "../grammar";
 
 // Start an AST node, attaching a start offset.
 
@@ -93,27 +93,27 @@ export function cloneStringLiteral(node: any): any {
 }
 
 export class NodeUtils extends UtilParser {
-  startNode<T extends SyntacticNode>(): T {
+  startNode<T extends SomeSyntaxNode>(): T {
     return (new Node(this, this.state.start, this.state.startLoc) as unknown) as T;
   }
 
-  startNodeAt<T extends SyntacticNode>(pos: number, loc: Position): T {
+  startNodeAt<T extends SomeSyntaxNode>(pos: number, loc: Position): T {
     return (new Node(this, pos, loc) as unknown) as T;
   }
 
   /** Start a new node with a previous node's location. */
-  startNodeAtNode<T extends SyntacticNode>({ start, loc } : T): T {
+  startNodeAtNode<T extends SomeSyntaxNode>({ start, loc } : T): T {
     return (this.startNodeAt(start, loc.start) as unknown) as T;
   }
 
   // Finish an AST node, adding `type` and `end` properties.
 
-  finishNode<T extends SyntacticNode>(node: T, type: SyntacticNode["type"]): T {
+  finishNode<T extends SomeSyntaxNode>(node: T, type: T["type"]): T {
     return this.finishNodeAt(node, type, this.state.lastTokEndLoc) as T;
   }
 
   // Finish node at given position
-  finishNodeAt<T extends SyntacticNode>(node: T, type: SyntacticNode["type"], endLoc: Position): T {
+  finishNodeAt<T extends SomeSyntaxNode>(node: T, type: T["type"], endLoc: Position): T {
     if (process.env.NODE_ENV !== "production" && node.end > 0) {
       throw new Error(
         "Do not call finishNode*() twice on the same node." +

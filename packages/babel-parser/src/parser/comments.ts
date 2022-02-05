@@ -1,7 +1,7 @@
 /*:: declare var invariant; */
 
 import BaseParser from "./base";
-import { Comment, SyntacticNode } from "../grammar";
+import { Comment, SomeSyntaxNode } from "../grammar";
 import * as charCodes from "charcodes";
 
 /**
@@ -20,9 +20,9 @@ export type CommentWhitespace = {
   start: number;
   end: number;
   comments: Comment[];
-  leadingNode: SyntacticNode | null;
-  trailingNode: SyntacticNode | null;
-  containingNode: SyntacticNode | null;
+  leadingNode: SomeSyntaxNode | null;
+  trailingNode: SomeSyntaxNode | null;
+  containingNode: SomeSyntaxNode | null;
 };
 
 /**
@@ -33,7 +33,7 @@ export type CommentWhitespace = {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-function setTrailingComments(node: SyntacticNode, comments: Comment[]) {
+function setTrailingComments(node: SomeSyntaxNode, comments: Comment[]) {
   if (node.trailingComments === undefined) {
     node.trailingComments = comments;
   } else {
@@ -49,7 +49,7 @@ function setTrailingComments(node: SyntacticNode, comments: Comment[]) {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-function setLeadingComments(node: SyntacticNode, comments: Comment[]) {
+function setLeadingComments(node: SomeSyntaxNode, comments: Comment[]) {
   if (node.leadingComments === undefined) {
     node.leadingComments = comments;
   } else {
@@ -65,7 +65,7 @@ function setLeadingComments(node: SyntacticNode, comments: Comment[]) {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-export function setInnerComments(node: SyntacticNode, comments: Comment[]) {
+export function setInnerComments(node: SomeSyntaxNode, comments: Comment[]) {
   if (node.innerComments === undefined) {
     node.innerComments = comments;
   } else {
@@ -83,8 +83,8 @@ export function setInnerComments(node: SyntacticNode, comments: Comment[]) {
  * @param {Array<Comment>} comments
  */
 function adjustInnerComments(
-  node: SyntacticNode,
-  elements: SyntacticNode[],
+  node: SomeSyntaxNode,
+  elements: SomeSyntaxNode[],
   commentWS: CommentWhitespace,
 ) {
   let lastElement = null;
@@ -114,7 +114,7 @@ export default class CommentsParser extends BaseParser {
    * @returns {void}
    * @memberof CommentsParser
    */
-  processComment(node: SyntacticNode): void {
+  processComment(node: SomeSyntaxNode): void {
     const { commentStack } = this.state;
     const commentStackLength = commentStack.length;
     if (commentStackLength === 0) return;
@@ -159,54 +159,30 @@ export default class CommentsParser extends BaseParser {
    */
   finalizeComment(commentWS: CommentWhitespace) {
     const { comments } = commentWS;
-    if (commentWS.leadingNode !== null || commentWS.trailingNode !== null) {
-      if (commentWS.leadingNode !== null) {
-        setTrailingComments(commentWS.leadingNode, comments);
-      }
-      if (commentWS.trailingNode !== null) {
-        setLeadingComments(commentWS.trailingNode, comments);
-      }
-    } else {
+    const hasLeadingNode = !!commentWS.leadingNode;
+    const hasTrailingNode = !!commentWS.trailingNode;
+    
+    if (!hasLeadingNode && !hasTrailingNode) {
       /*:: invariant(commentWS.containingNode !== null) */
       const { containingNode: node, start: commentStart } = commentWS;
-      if (this.input.charCodeAt(commentStart - 1) === charCodes.comma) {
-        // If a commentWhitespace follows a comma and the containingNode allows
-        // list structures with trailing comma, merge it to the trailingComment
-        // of the last non-null list element
-        switch (node.type) {
-          case "ObjectExpression":
-          case "ObjectPattern":
-          case "RecordExpression":
-            adjustInnerComments(node, node.properties, commentWS);
-            break;
-          case "CallExpression":
-          case "OptionalCallExpression":
-            adjustInnerComments(node, node.arguments, commentWS);
-            break;
-          case "FunctionDeclaration":
-          case "FunctionExpression":
-          case "ArrowFunctionExpression":
-          case "ObjectMethod":
-          case "ClassMethod":
-          case "ClassPrivateMethod":
-            adjustInnerComments(node, node.params, commentWS);
-            break;
-          case "ArrayExpression":
-          case "ArrayPattern":
-          case "TupleExpression":
-            adjustInnerComments(node, node.elements, commentWS);
-            break;
-          case "ExportNamedDeclaration":
-          case "ImportDeclaration":
-            adjustInnerComments(node, node.specifiers, commentWS);
-            break;
-          default: {
-            setInnerComments(node, comments);
-          }
-        }
-      } else {
-        setInnerComments(node, comments);
-      }
+      const adjustTrailingCommaComments =
+        this.trailingCommaProperty(node) &&
+        this.input.charCodeAt(commentStart - 1) === charCodes.comma;
+
+      // If a commentWhitespace follows a comma and the containingNode allows
+      // list structures with trailing comma, merge it to the trailingComment
+      // of the last non-null list element
+      return adjustTrailingCommaComments
+        ? adjustInnerComments(node, node[trailingCommaProperty], commentWS)
+        : setInnerComments(node, comments);
+    }
+
+    if (hasLeadingNode) {
+      setTrailingComments(commentWS.leadingNode, comments);
+    }
+
+    if (hasTrailingNode) {
+      setLeadingComments(commentWS.trailingNode, comments);
     }
   }
 
@@ -244,7 +220,7 @@ export default class CommentsParser extends BaseParser {
    * @returns
    * @memberof CommentsParser
    */
-  resetPreviousNodeTrailingComments(node: SyntacticNode) {
+  resetPreviousNodeTrailingComments(node: SomeSyntaxNode) {
     const { commentStack } = this.state;
     const { length } = commentStack;
     if (length === 0) return;
@@ -265,7 +241,7 @@ export default class CommentsParser extends BaseParser {
    * @param {number} start
    * @param {number} end
    */
-  takeSurroundingComments(node: SyntacticNode, start: number, end: number) {
+  takeSurroundingComments(node: SomeSyntaxNode, start: number, end: number) {
     const { commentStack } = this.state;
     const commentStackLength = commentStack.length;
     if (commentStackLength === 0) return;
@@ -284,5 +260,9 @@ export default class CommentsParser extends BaseParser {
         break;
       }
     }
+  }
+  
+  trailingCommaProperty<T>(node: SyntaxNode<T>) : string | undefined {
+    return node.specification.trailingCommaProperty;
   }
 }
