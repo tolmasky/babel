@@ -1,49 +1,35 @@
-import type FunctionNode from "./function-node";
+import { FunctionNode, Annotation } from "./function-node";
 
-export interface FunctionExpression
-  extends FunctionNode<
-    "FunctionExpression",
-    "FunctionExpression",
-    false,
-    false
-  > {}
+export type FunctionExpression = FunctionNode<{
+  type: "FunctionExpression"
+}>;
 
-export interface GeneratorExpression
-  extends FunctionNode<
-    "GeneratorExpression",
-    "FunctionExpression",
-    true,
-    false
-  > {}
+export type GeneratorExpression = FunctionNode<
+  Annotation.Generator | {
+    type: "FunctionExpression";
+    GrammarSymbol: "GeneratorExpression"
+}>;
 
-export interface AsyncGeneratorExpression
-  extends FunctionNode<
-    "AsyncGeneratorExpression",
-    "FunctionExpression",
-    true,
-    true
-  > {}
+export type AsyncGeneratorExpression = FunctionNode<
+  Annotation.Asynchronous |
+  Annotation.Generator | {
+    type: "FunctionExpression";
+    GrammarSymbol: "AsyncGeneratorExpression"
+}>;
 
-export interface AsyncFunctionExpression
-  extends FunctionNode<
-    "AsyncFunctionExpression",
-    "FunctionExpression",
-    false,
-    true
-  > {}
+export type AsyncFunctionExpression = FunctionNode<
+  Annotation.Asynchronous | {
+    type: "FunctionExpression";
+    GrammarSymbol: "AsyncFunctionExpression";
+}>;
 
-export interface ArrowFunction
-  extends FunctionNode<
-    "ArrowFunction",
-    "ArrowFunctionExpression",
-    false,
-    false
-  > {}
+export type ArrowFunction = FunctionNode<{
+  type: "ArrowFunctionExpression";
+  GrammarSymbol: "ArrowFunction";
+}>;
 
-export interface AsyncArrowFunction
-  extends FunctionNode<
-    "ArrowFunction",
-    "ArrowFunctionExpression",
-    false,
-    true
-  > {}
+export type AsyncArrowFunction = FunctionNode<
+  Annotation.Asynchronous | {
+    type: "ArrowFunctionExpression";
+    GrammarSymbol: "AsyncArrowFunction";
+}>;

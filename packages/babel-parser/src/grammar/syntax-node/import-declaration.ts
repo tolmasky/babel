@@ -1,11 +1,11 @@
-import type SyntacticProduction from "../syntactic-production";
+import SyntaxNode from "../syntax-node";
 import { StringLiteral } from "./literal";
+import BindingIdentifier from "./bindings/binding-identifier";
 
-type BindingIdentifer = {};
 type ImportSpecifier = {};
 
-export interface ImportDeclaration
-  extends SyntacticProduction<"ImportDeclaration"> {
+export type ImportDeclaration = SyntaxNode<{
+  type: "ImportDeclaration";
   // TODO: readonly
   specifiers: ImportSpecifier[];
   //    (ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier)[];
@@ -14,7 +14,7 @@ export interface ImportDeclaration
   //  importKind?: "type" | "typeof" | "value", // TODO: Not in spec
 
   //  assertions?: readonly ImportAttribute[];
-}
+}>;
 /*
 type ImportedBinding = BindingIdentifier;
 

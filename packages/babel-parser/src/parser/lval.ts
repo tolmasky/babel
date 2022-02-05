@@ -27,7 +27,7 @@ import {
 import { NodeUtils } from "./node";
 import { type BindingTypes, BIND_NONE } from "../util/scopeflags";
 import { ExpressionErrors } from "./util";
-import Errors from "./errors";
+import { Errors } from "../parse-error";
 
 const unwrapParenthesizedExpression = (
   expression: N.Expression | N.PatternLike

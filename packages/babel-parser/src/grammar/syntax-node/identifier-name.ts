@@ -1,7 +1,11 @@
 import type SyntaxNode from "../syntax-node";
 
 // IdentifierNameNode?
-export default interface IdentifierName<GrammarSymbol>
-  extends SyntaxNode<GrammarSymbol, "Identifier"> {
+export type IdentifierName<GrammarSymbol extends string> = SyntaxNode<{
+  type: "Identifier";
+  GrammarSymbol: GrammarSymbol;
+
   name: string;
-}
+}>;
+
+export default IdentifierName;

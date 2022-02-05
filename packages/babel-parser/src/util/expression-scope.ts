@@ -1,6 +1,6 @@
-import { Position, SyntacticNode } from "../grammar";
+import { Position, SyntaxNode } from "../grammar";
 import Tokenizer from "../tokenizer";
-import { type DeferredParseErrorMap, Errors } from "../parse-error";
+import { DeferredParseErrorMap, Errors } from "../parse-error";
 
 /*:: declare var invariant; */
 /**
@@ -136,7 +136,7 @@ export default class ExpressionScopeHandler {
    */
   recordParameterInitializerError(
     ParsingError: ArrowHeadParsingParameterInitializerErrorClass,
-    properties: { at: SyntacticNode }
+    properties: { at: SyntaxNode<any> }
   ): void {
     const { stack } = this;
     let i = stack.length - 1;
@@ -176,7 +176,7 @@ export default class ExpressionScopeHandler {
    * @returns {void}
    * @memberof ExpressionScopeHandler
    */
-  recordParenthesizedIdentifierError(properties: { at: SyntacticNode }): void {
+  recordParenthesizedIdentifierError(properties: { at: SyntaxNode<any> }): void {
     const { stack } = this;
     const scope: ExpressionScope = stack[stack.length - 1];
     if (scope.isCertainlyParameterDeclaration()) {

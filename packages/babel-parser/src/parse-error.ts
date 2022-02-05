@@ -1,4 +1,4 @@
-import { SomeSyntaxNode, Position } from "./grammar";
+import { SyntaxNode, Position } from "./grammar";
 
 export enum ParserErrorCode {
   SyntaxError =  "BABEL_PARSER_SYNTAX_ERROR",
@@ -23,7 +23,8 @@ export interface ParseError {
   reasonCode: string;
 }
 
-type Origin = { at: Position | SomeSyntaxNode };
+// Can we get rid of this any?
+type Origin = { at: Position | SyntaxNode<any> };
 type ParseErrorConstructorProperties<T extends ToMessage> = Origin &
   Omit<Parameters<T>[0], "loc">;
 

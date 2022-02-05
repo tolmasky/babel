@@ -12,12 +12,16 @@ export type Literal =
 export default Literal;
 
 // https://tc39.es/ecma262/#prod-NullLiteral
-export interface NullLiteral extends SyntaxNode<"NullLiteral"> {}
+export type NullLiteral = SyntaxNode<{
+  type: "NullLiteral"
+}>;
 
 // https://tc39.es/ecma262/#sec-boolean-literals
-export interface BooleanLiteral extends SyntaxNode<"BooleanLiteral"> {
+export type BooleanLiteral = SyntaxNode<{
+  type: "BooleanLiteral";
+
   extra?: Extra<boolean>;
-}
+}>;
 
 // https://tc39.es/ecma262/#sec-literals-numeric-literals
 export type NumericLiteral =
@@ -28,38 +32,50 @@ export type NumericLiteral =
   | LegacyOctalIntegerLiteral;
 
 // https://tc39.es/ecma262/#prod-DecimalLiteral
-export interface DecimalLiteral
-  extends SyntaxNode<"DecimalLiteral", "NumericLiteral"> {
+export type DecimalLiteral = SyntaxNode<{
+  type: "NumericLiteral";
+  GrammarSymbol: "DecimalLiteral";
+
   extra?: Extra<number>;
-}
+}>;
 
 // https://tc39.es/ecma262/#prod-DecimalIntegerLiteral
-export interface DecimalBigIntegerLiteral
-  extends SyntaxNode<"DecimalBigIntegerLiteral", "BigIntLiteral"> {
+export type DecimalBigIntegerLiteral = SyntaxNode<{
+  type: "BigIntLiteral";
+  GrammarSymbol: "DecimalBigIntegerLiteral";
+
   extra?: Extra<BigInt>;
-}
+}>;
 
 // https://tc39.es/ecma262/#prod-NonDecimalIntegerLiteral
-export interface NonDecimalIntegerLiteral
-  extends SyntaxNode<"NonDecimalIntegerLiteral", "NumericLiteral"> {
+export type NonDecimalIntegerLiteral = SyntaxNode<{
+  type: "NumericLiteral";
+  GrammarSymbol: "NonDecimalIntegerLiteral";
+
   extra?: Extra<number>;
-}
+}>;
 
 // https://tc39.es/ecma262/#sec-literals-numeric-literals
-export interface NonDecimalBigIntLiteral
-  extends SyntaxNode<"NonDecimalBigIntegerLiteral", "BigIntLiteral"> {
+export type NonDecimalBigIntLiteral = SyntaxNode<{
+  type: "BigIntLiteral";
+  GrammarSymbol: "NonDecimalBigIntegerLiteral";
+
   extra?: Extra<BigInt>;
-}
+}>;
 
 // https://tc39.es/ecma262/#prod-LegacyOctalIntegerLiteral
-export interface LegacyOctalIntegerLiteral
-  extends SyntaxNode<"LegacyOctalIntegerLiteral", "NumericLiteral"> {
+export type LegacyOctalIntegerLiteral = SyntaxNode<{
+  type: "NumericLiteral";
+  GrammarSymbol: "LegacyOctalIntegerLiteral";
+
   extra?: Extra<number>;
-}
+}>;
 
 // https://tc39.es/ecma262/#prod-RegularExpressionLiteral
-export interface RegularExpressionLiteral
-  extends SyntaxNode<"RegularExpressionLiteral", "RegExpLiteral"> {
+export type RegularExpressionLiteral = SyntaxNode<{
+  type: "RegExpLiteral";
+  GrammarSymbol: "RegularExpressionLiteral";
+
   // FIXME: (?) Backwards compatibility: Babel currently always assigns a null
   // RegExpLiteral.extra.rawValue.
   extra?: Extra<undefined>;
@@ -69,12 +85,14 @@ export interface RegularExpressionLiteral
 
   pattern: string;
   flags: string; //RegExp$flags;
-}
+}>;
 
 // https://tc39.es/ecma262/#sec-literals-string-literals
-export interface StringLiteral extends SyntaxNode<string, "StringLiteral"> {
+export type StringLiteral = SyntaxNode<{
+  type: "StringLiteral";
+
   extra?: Extra<string>;
-}
+}>;
 
 interface Extra<T> {
   raw: string;

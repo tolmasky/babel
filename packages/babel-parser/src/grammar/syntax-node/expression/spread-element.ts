@@ -16,7 +16,10 @@ type AssignmentSyntaxNode = { }
 // parsing from the source text, where this would be an impossibility. It is
 // worth considering surfacing this restriction to the main Babel AST too
 // though, as it may be helpful during code transformations.
-export default interface SpreadElement extends SyntaxNode<"SpreadElement"> {
-  argument: AssignmentSyntaxNode;
-}
+export type SpreadElement = SyntaxNode<{
+  type: "SpreadElement";
 
+  argument: AssignmentSyntaxNode;
+}>;
+
+export default SpreadElement;

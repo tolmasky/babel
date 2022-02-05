@@ -7,10 +7,12 @@ type AssignmentExpression = {};
 //
 // BABEL-ECMA-BRIDGE-NOTE: In Babel, we call `ArrayLiteral`s `ArrayExpression`s.
 // I actually agree that this is a better name, but whatcha gonna do?
-export interface ArrayLiteral
-  extends SyntaxNode<"ArrayLiteral", "ArrayExpression"> {
+export type ArrayLiteral = SyntaxNode<{
+  type: "ArrayExpression";
+  GrammarSymbol: "ArrayLiteral";
+
   elements: ElementList;
-}
+}>;
 
 export default ArrayLiteral;
 

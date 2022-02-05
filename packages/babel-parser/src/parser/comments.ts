@@ -1,7 +1,7 @@
 /*:: declare var invariant; */
 
 import BaseParser from "./base";
-import { Comment, SomeSyntaxNode } from "../grammar";
+import { Comment, SyntaxNode } from "../grammar";
 import * as charCodes from "charcodes";
 
 /**
@@ -20,9 +20,9 @@ export type CommentWhitespace = {
   start: number;
   end: number;
   comments: Comment[];
-  leadingNode: SomeSyntaxNode | null;
-  trailingNode: SomeSyntaxNode | null;
-  containingNode: SomeSyntaxNode | null;
+  leadingNode: SyntaxNode<any> | null;
+  trailingNode: SyntaxNode<any> | null;
+  containingNode: SyntaxNode<any> | null;
 };
 
 /**
@@ -33,7 +33,7 @@ export type CommentWhitespace = {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-function setTrailingComments(node: SomeSyntaxNode, comments: Comment[]) {
+function setTrailingComments(node: SyntaxNode<any>, comments: Comment[]) {
   if (node.trailingComments === undefined) {
     node.trailingComments = comments;
   } else {
@@ -49,7 +49,7 @@ function setTrailingComments(node: SomeSyntaxNode, comments: Comment[]) {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-function setLeadingComments(node: SomeSyntaxNode, comments: Comment[]) {
+function setLeadingComments(node: SyntaxNode<any>, comments: Comment[]) {
   if (node.leadingComments === undefined) {
     node.leadingComments = comments;
   } else {
@@ -65,7 +65,7 @@ function setLeadingComments(node: SomeSyntaxNode, comments: Comment[]) {
  * @param {Node} node
  * @param {Array<Comment>} comments
  */
-export function setInnerComments(node: SomeSyntaxNode, comments: Comment[]) {
+export function setInnerComments(node: SyntaxNode<any>, comments: Comment[]) {
   if (node.innerComments === undefined) {
     node.innerComments = comments;
   } else {
@@ -83,8 +83,8 @@ export function setInnerComments(node: SomeSyntaxNode, comments: Comment[]) {
  * @param {Array<Comment>} comments
  */
 function adjustInnerComments(
-  node: SomeSyntaxNode,
-  elements: SomeSyntaxNode[],
+  node: SyntaxNode<any>,
+  elements: SyntaxNode<any>[],
   commentWS: CommentWhitespace,
 ) {
   let lastElement = null;
@@ -114,7 +114,7 @@ export default class CommentsParser extends BaseParser {
    * @returns {void}
    * @memberof CommentsParser
    */
-  processComment(node: SomeSyntaxNode): void {
+  processComment(node: SyntaxNode<any>): void {
     const { commentStack } = this.state;
     const commentStackLength = commentStack.length;
     if (commentStackLength === 0) return;
@@ -165,8 +165,9 @@ export default class CommentsParser extends BaseParser {
     if (!hasLeadingNode && !hasTrailingNode) {
       /*:: invariant(commentWS.containingNode !== null) */
       const { containingNode: node, start: commentStart } = commentWS;
+      const trailingCommaProperty = this.trailingCommaProperty(node);
       const adjustTrailingCommaComments =
-        this.trailingCommaProperty(node) &&
+        trailingCommaProperty &&
         this.input.charCodeAt(commentStart - 1) === charCodes.comma;
 
       // If a commentWhitespace follows a comma and the containingNode allows
@@ -220,7 +221,7 @@ export default class CommentsParser extends BaseParser {
    * @returns
    * @memberof CommentsParser
    */
-  resetPreviousNodeTrailingComments(node: SomeSyntaxNode) {
+  resetPreviousNodeTrailingComments(node: SyntaxNode<any>) {
     const { commentStack } = this.state;
     const { length } = commentStack;
     if (length === 0) return;
@@ -241,7 +242,7 @@ export default class CommentsParser extends BaseParser {
    * @param {number} start
    * @param {number} end
    */
-  takeSurroundingComments(node: SomeSyntaxNode, start: number, end: number) {
+  takeSurroundingComments(node: SyntaxNode<any>, start: number, end: number) {
     const { commentStack } = this.state;
     const commentStackLength = commentStack.length;
     if (commentStackLength === 0) return;
@@ -262,7 +263,7 @@ export default class CommentsParser extends BaseParser {
     }
   }
   
-  trailingCommaProperty<T>(node: SyntaxNode<T>) : string | undefined {
+  trailingCommaProperty<T extends SyntaxNode<any>>(node: T) : string | undefined {
     return node.specification.trailingCommaProperty;
   }
 }

@@ -1,4 +1,5 @@
-import SyntactiProduction from "../syntactic-production";
+import SyntaxNode from "../syntax-node";
+import ClassDeclaration from "./declaration/class-declaration";
 import HoistableDeclaration from "./declaration/hoistable-declaration";
 
 export type ExportDeclaration =
@@ -7,15 +8,16 @@ export type ExportDeclaration =
 
 export default ExportDeclaration;
 
-export interface ExportNamedDeclaration
-  extends SyntactiProduction<"ExportNamedDeclaration"> {
+export type ExportNamedDeclaration = SyntaxNode<{
+  type: "ExportNamedDeclaration";
+
   declaration: HoistableDeclaration;
-}
+}>;
 
-export interface ExportDefaultDeclaration
-  extends SyntactiProduction<"ExportDefaultDeclaration"> {
+export type ExportDefaultDeclaration = SyntaxNode<{
+  type: "ExportDefaultDeclaration";
+
   delcaration: HoistableDeclaration | ClassDeclaration | AssignmentExpression;
-}
+}>;
 
-type ClassDeclaration = {};
 type AssignmentExpression = {};

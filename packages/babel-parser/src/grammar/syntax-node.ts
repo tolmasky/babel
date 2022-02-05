@@ -1,17 +1,40 @@
-import type SourceNode from "./source-node";
-import type Comment from "./comment";
+import { Specification, SourceNode } from "./source-node";
+import Comment from "./comment";
 import SourceLocation from "./source-location";
 
-export default interface SyntaxNode<GrammarSymbol, type = GrammarSymbol>
-  extends SourceNode<symbol, type> {
-  leadingComments?: Comment[];
-  trailingComments?: Comment[];
-  innerComments?: Comment[];
+export type SyntaxNode<specification extends Specification> = SourceNode<
+  {
+    leadingComments?: Comment[];
+    trailingComments?: Comment[];
+    innerComments?: Comment[];
+  } & WithoutAnnotations<specification> & {
+      specification: {
+        trailingCommaProperty: NeverToUndefined<
+          GetTrailingCommaProperty<specification>
+        >;
+      };
+    }
+>;
 
-//  extra?: { [key: string]: any };
-}
+export default SyntaxNode;
 
-export * from "./syntax-node/some-syntax-node";
+const AllowsTrailingComma = Symbol("AllowsTrailingComma");
+export type AllowsTrailingComma = { [AllowsTrailingComma]: true };
+
+const Traversable = Symbol("Traversable");
+export type Traversable<Index extends number> = { [Traversable]: { index: Index } };
+
+type WithoutAnnotations<T extends { [_: string]: any }> =
+{
+  [K in keyof T]: Exclude<T[K], Traversable<0> | AllowsTrailingComma>;
+};
+
+type NeverToUndefined<T> = [T] extends [never] ? undefined : T;
+
+type GetTrailingCommaProperty<T extends { [_: string]: any }> =
+{
+  [K in keyof T]: AllowsTrailingComma extends T[K] ? K : never;
+}[keyof T];
 
 export * from "./syntax-node/statement";
 export * from "./syntax-node/expression";

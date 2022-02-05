@@ -3,9 +3,12 @@ import IdentifierReference from "./identifier-reference";
 import SpreadElement from "./spread-element";
 
 // https://tc39.es/ecma262/#prod-ObjectLiteral
-export interface ObjectLiteral extends SyntaxNode<"ObjectLiteral", "ObjectExpression"> {
+export type ObjectLiteral = SyntaxNode<{
+  type: "ObjectExpression";
+  GrammarSymbol: "ObjectLiteral";
+
   properties: PropertyDefinitionList;
-};
+}>;
 
 export default ObjectLiteral;
 

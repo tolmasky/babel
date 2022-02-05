@@ -1,4 +1,4 @@
-import type FunctionNode from "../function-node";
+import { FunctionNode, Annotation } from "../function-node";
 
 // https://tc39.es/ecma262/#prod-HoistableDeclaration
 export type HoistableDeclaration =
@@ -10,20 +10,28 @@ export type HoistableDeclaration =
 export default HoistableDeclaration;
 
 // https://tc39.es/ecma262/#prod-FunctionDeclaration
-export interface FunctionDeclaration
-  extends HoistableDeclarationNode<"FunctionDeclaration", false, false> {}
+export type FunctionDeclaration = FunctionNode<{
+  type: "FunctionDeclaration"
+}>;
 
 // https://tc39.es/ecma262/#prod-GeneratorDeclaration
-export interface GeneratorDeclaration
-  extends HoistableDeclarationNode<"GeneratorDeclaration", true, false> {}
+export type GeneratorDeclaration = FunctionNode<
+  Annotation.Generator | {
+    type: "FunctionDeclaration";
+    GrammarSymbol: "GeneratorDeclaration";
+}>;
 
 // https://tc39.es/ecma262/#prod-AsyncFunctionDeclaration
-export interface AsyncFunctionDeclaration
-  extends HoistableDeclarationNode<"AsyncFunctionDeclaration", false, true> {}
+export type AsyncFunctionDeclaration = FunctionNode<
+  Annotation.Asynchronous | {
+    type: "FunctionDeclaration";
+    GrammarSymbol: "AsyncFunctionDeclaration"
+}>;
 
 // https://tc39.es/ecma262/#prod-AsyncGeneratorDeclaration
-export interface AsyncGeneratorDeclaration
-  extends HoistableDeclarationNode<"AsyncGeneratorDeclaration", true, true> {}
-
-type HoistableDeclarationNode<GrammarSymbol, isGenerator, isAsync> =
-    FunctionNode<GrammarSymbol, "FunctionDeclaration", isGenerator, isAsync>;
+export type AsyncGeneratorDeclaration = FunctionNode<
+  Annotation.Asynchronous |
+  Annotation.Generator | {
+    type:"FunctionDeclaration";
+    GrammarSymbol: "AsyncGeneratorDeclaration"
+}>;

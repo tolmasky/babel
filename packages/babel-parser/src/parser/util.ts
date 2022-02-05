@@ -1,7 +1,4 @@
-import {
-  Position,
-  SyntacticNode,
-} from "../grammar";
+import { Position, SyntaxNode } from "../grammar";
 import { Errors, ParseErrorClass } from "../parse-error";
 import {
   tokenIsLiteralPropertyName,
@@ -39,7 +36,7 @@ export default class UtilParser extends Tokenizer {
   // TODO
 
   addExtra(
-    node: SyntacticNode,
+    node: SyntaxNode<any>,
     key: string,
     value: any,
     enumerable: boolean = true,
@@ -139,7 +136,7 @@ export default class UtilParser extends Tokenizer {
 
   // tryParse will clone parser state.
   // It is expensive and should be used with cautions
-  tryParse<T extends SyntacticNode | readonly SyntacticNode[]>(
+  tryParse<T extends SyntaxNode<any> | readonly SyntaxNode<any>[]>(
     fn: (abort: (node?: T) => never) => T,
     oldState: State = this.state.clone(),
   ):
@@ -254,7 +251,7 @@ export default class UtilParser extends Tokenizer {
    * will be overridden in ESTree plugin
    */
 /*
-  isPrivateName(node: SyntacticNode): boolean {
+  isPrivateName(node: SyntaxNode<any>): boolean {
     return node.type === "PrivateName";
   }
 */
@@ -273,7 +270,7 @@ export default class UtilParser extends Tokenizer {
    * contains a private name as its property
    * It is overridden in ESTree plugin
    */
-  hasPropertyAsPrivateName(node: SyntacticNode): boolean {
+  hasPropertyAsPrivateName(node: SyntaxNode<any>): boolean {
     return (
       (node.type === "MemberExpression" ||
         node.type === "OptionalMemberExpression") &&
@@ -281,18 +278,18 @@ export default class UtilParser extends Tokenizer {
     );
   }
 /*
-  isOptionalChain(node: SyntacticNode): boolean {
+  isOptionalChain(node: SyntaxNode<any>): boolean {
     return (
       node.type === "OptionalMemberExpression" ||
       node.type === "OptionalCallExpression"
     );
   }
 
-  isObjectProperty(node: SyntacticNode): boolean {
+  isObjectProperty(node: SyntaxNode<any>): boolean {
     return node.type === "ObjectProperty";
   }
 
-  isObjectMethod(node: SyntacticNode): boolean {
+  isObjectMethod(node: SyntaxNode<any>): boolean {
     return node.type === "ObjectMethod";
   }
 */
