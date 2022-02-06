@@ -1,4 +1,5 @@
 import { Position, SyntaxNode } from "../grammar";
+import * as N from "../grammar";
 import { Errors, ParseErrorClass } from "../parse-error";
 import {
   tokenIsLiteralPropertyName,
@@ -250,21 +251,21 @@ export default class UtilParser extends Tokenizer {
    * Test if given node is a PrivateName
    * will be overridden in ESTree plugin
    */
-/*
+
   isPrivateName(node: SyntaxNode<any>): boolean {
     return node.type === "PrivateName";
   }
-*/
+
   /*
    * Return the string value of a given private name
    * WITHOUT `#`
    * @see {@link https://tc39.es/ecma262/#sec-static-semantics-stringvalue}
    */
-   /*
-  getPrivateNameSV(node: { id: N.Identifier }): string {
+
+  getPrivateNameSV(node: N.PrivateIdentifier): string {
     return node.id.name;
   }
-*/
+
   /*
    * Return whether the given node is a member/optional chain that
    * contains a private name as its property

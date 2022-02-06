@@ -1,8 +1,8 @@
-import Declaration from "./declaration";
+import EmptyStatement from "./statement/empty-statement";
 
 export type Statement =
-  | Declaration;
+  | EmptyStatement;
 
 export default Statement;
 
-export * from "./declaration";
+export * from "./statement/empty-statement";

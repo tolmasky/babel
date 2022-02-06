@@ -36,11 +36,16 @@ type GetTrailingCommaProperty<T extends { [_: string]: any }> =
   [K in keyof T]: AllowsTrailingComma extends T[K] ? K : never;
 }[keyof T];
 
-export * from "./syntax-node/statement";
+export * from "./syntax-node/statement-list";
 export * from "./syntax-node/expression";
+export * from "./syntax-node/class";
+export * from "./syntax-node/identifier-name";
+export * from "./syntax-node/property-name";
 
 export * from "./syntax-node/export-declaration";
 
 export * from "./syntax-node/bindings/binding-identifier";
 export * from "./syntax-node/bindings/binding-pattern";
+
+export * from "./syntax-node/expression/spread-element";
 

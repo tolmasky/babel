@@ -1,9 +1,9 @@
-
-import type IdentifierReference from "./expression/identifier-reference";
-import type Literal from "./literal";
-import type Decorator from "./decorator";
-import type ArrayLiteral from "./expression/array-literal";
-import type ObjectLiteral from "./expression/object-literal";
+import IdentifierReference from "./expression/identifier-reference";
+import Literal from "./literal";
+import Decorator from "./decorator";
+import ArrayLiteral from "./expression/array-literal";
+import ObjectLiteral from "./expression/object-literal";
+import ParenthesizedExpression from "./expression/parenthesized-expression";
 
 export type Expression =
     | IdentifierReference
@@ -15,7 +15,8 @@ export type Expression =
     | GeneratorExpression
     | AsyncFunctionExpression
     | AsyncGeneratorExpression
-    | ArrowFunction;
+    | ArrowFunction
+    | ParenthesizedExpression;
 
 export default Expression;
 
@@ -33,3 +34,4 @@ export * from "./expression/object-literal";
 export * from "./literal";
 export * from "./decorator";
 export * from "./function-expression";
+export * from "./expression/parenthesized-expression";

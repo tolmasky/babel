@@ -3,22 +3,7 @@
 /*:: declare var invariant; */
 import * as charCodes from "charcodes";
 import { tt, type TokenType } from "../tokenizer/types";
-import type {
-  TSParameterProperty,
-  Decorator,
-  Expression,
-  Node,
-  Pattern,
-  RestElement,
-  SpreadElement,
-//  ClassMember,
-//  ObjectMember,
-//  TsNamedTypeElementBase,
-  Identifier,
-  ObjectExpression,
-  ObjectPattern,
-} from "@babel/types";
-import type * as N from "@babel/types";
+import * as N from "../grammar";
 import { Pos, Position } from "../grammar/source-location";
 import {
   isStrictBindOnlyReservedWord,
@@ -29,14 +14,16 @@ import { type BindingTypes, BIND_NONE } from "../util/scopeflags";
 import { ExpressionErrors } from "./util";
 import { Errors } from "../parse-error";
 
+type CharCode = charCodes[keyof charCodes];
+
 const unwrapParenthesizedExpression = (
-  expression: N.Expression | N.PatternLike
-): Exclude<N.Expression | N.PatternLike, N.ParenthesizedExpression> =>
+  expression: N.Expression | N.BindingPattern
+): Exclude<N.Expression | N.BindingPattern, N.ParenthesizedExpression> =>
   expression.type === "ParenthesizedExpression"
     ? unwrapParenthesizedExpression(expression.expression)
     : expression;
 
-
+/*
 type ObjectMember = N.ObjectProperty | N.ObjectMethod;
 type ClassMember =
   | N.ClassMethod
@@ -59,20 +46,20 @@ type TsNamedTypeElementBase = {
   computed: boolean;
   optional?: true;
 };
-
+*/
 const UnsafeCast = <From, To>(node: From) => ((node as unknown) as To);
 
 export default abstract class LValParser extends NodeUtils {
   // Forward-declaration: defined in expression.js
-  abstract parseIdentifier(liberal?: boolean): Identifier;
+  abstract parseIdentifier<T extends N.SyntaxNode<any>>(liberal?: boolean): T;
 
   abstract parseMaybeAssignAllowIn(
     refExpressionErrors?: ExpressionErrors,
     afterLeftParse?: Function,
     refNeedsArrowPos?: Pos,
-  ): Expression;
+  ): N.Expression;
 
-  abstract parseObjectLike<T extends (ObjectPattern | ObjectExpression)> (
+  abstract parseObjectLike<T extends (N.ObjectBindingPattern | N.ObjectLiteral)> (
     close: TokenType,
     isPattern: boolean,
     isRecord?: boolean,
@@ -91,13 +78,13 @@ export default abstract class LValParser extends NodeUtils {
   ): void;
 
   abstract parsePropertyName(
-    prop: ObjectOrClassMember | ClassMember | TsNamedTypeElementBase,
-  ): Expression | Identifier;
+    prop: N.ClassElement | ObjectOrClassMember  | TsNamedTypeElementBase,
+  ): N.PropertyName;
 
-  abstract parsePrivateName(): N.PrivateName;
+  abstract parsePrivateName(): N.PrivateIdentifier;
 
   // Forward-declaration: defined in statement.js
-  abstract parseDecorator(): Decorator;
+  abstract parseDecorator(): N.Decorator;
 
   /**
    * Convert existing expression atom to assignable pattern
@@ -128,7 +115,7 @@ export default abstract class LValParser extends NodeUtils {
 
       case "ObjectExpression":
         const objectPattern =
-            UnsafeCast<N.ObjectExpression, N.ObjectPattern>(node);
+            UnsafeCast<N.ObjectLiteral, N.ObjectBindingPattern>(node);
         objectPattern.type = "ObjectPattern";
         for (
           let i = 0, length = objectPattern.properties.length, last = length - 1;
@@ -166,7 +153,7 @@ export default abstract class LValParser extends NodeUtils {
       case "SpreadElement": {
         this.checkToRestConversion(node);
 
-        const restElement = UnsafeCast<N.SpreadElement, N.RestElement>(node);
+        const restElement = UnsafeCast<N.SpreadElement, N.BindingRestElement>(node);
         restElement.type = "RestElement";
         const arg = restElement.argument;
         this.toAssignable(restElement, isLHS);
@@ -175,7 +162,7 @@ export default abstract class LValParser extends NodeUtils {
 
       case "ArrayExpression":
         const arrayPattern =
-            UnsafeCast<N.ArrayExpression, N.ArrayPattern>(node);
+            UnsafeCast<N.ArrayLiteral, N.ArrayBindingPattern>(node);
         arrayPattern.type = "ArrayPattern";
         this.toAssignableList(
           node.elements,
@@ -252,17 +239,17 @@ export default abstract class LValParser extends NodeUtils {
   // Convert list of expression atoms to binding list.
 
   toAssignableList(
-    exprList: (Expression | SpreadElement | N.PatternLike)[],
+    exprList: (N.Expression | N.SpreadElement | N.BindingPattern)[],
     trailingCommaLoc: Position | null | undefined,
     isLHS: boolean,
-  ): readonly Pattern[] {
+  ): N.BindingElementList {
     let end = exprList.length;
     if (end) {
       const last = exprList[end - 1];
       if (last?.type === "RestElement") {
         --end;
       } else if (last?.type === "SpreadElement") {
-        UnsafeCast<N.SpreadElement, N.RestElement>(last).type = "RestElement";
+        UnsafeCast<N.SpreadElement, N.BindingRestElement>(last).type = "RestElement";
         this.toAssignable(last.argument, isLHS);
         const arg = unwrapParenthesizedExpression(last.argument);
         if (
@@ -292,7 +279,7 @@ export default abstract class LValParser extends NodeUtils {
         }
       }
     }
-    return exprList as Pattern[];
+    return exprList as N.BindingElementList;
   }
 
   isAssignable(node: Node, isBinding: boolean = false): boolean {
@@ -345,15 +332,15 @@ export default abstract class LValParser extends NodeUtils {
 
   // FIXME: This used to be readonly (Expression | null | undefined)[]
   toReferencedList(
-    exprList: readonly (Expression | SpreadElement)[],
+    exprList: readonly (N.Expression | N.SpreadElement)[],
     isParenthesizedExpr: boolean = false, // eslint-disable-line no-unused-vars
-  ): readonly Expression[] {
+  ): readonly N.Expression[] {
     return exprList;
   }
 
   // FIXME: This used to be readonly (Expression | null | undefined)[]
   toReferencedListDeep(
-    exprList: readonly (Expression | SpreadElement)[],
+    exprList: readonly (N.Expression | N.SpreadElement)[],
     isParenthesizedExpr: boolean = false,
   ): void {
     this.toReferencedList(exprList, isParenthesizedExpr);
@@ -370,7 +357,7 @@ export default abstract class LValParser extends NodeUtils {
   parseSpread(
     refExpressionErrors: ExpressionErrors,
     refNeedsArrowPos?: Pos,
-  ): SpreadElement {
+  ): N.SpreadElement {
     const node = this.startNode<N.SpreadElement>();
     this.next();
     node.argument = this.parseMaybeAssignAllowIn(
@@ -383,8 +370,8 @@ export default abstract class LValParser extends NodeUtils {
 
   // https://tc39.es/ecma262/#prod-BindingRestProperty
   // https://tc39.es/ecma262/#prod-BindingRestElement
-  parseRestBinding(): RestElement {
-    const node = this.startNode<N.RestElement>();
+  parseRestBinding(): N.BindingRestElement {
+    const node = this.startNode<N.BindingRestElement>();
     this.next(); // eat `...`
     node.argument = this.parseBindingAtom();
     return this.finishNode(node, "RestElement");
@@ -394,26 +381,26 @@ export default abstract class LValParser extends NodeUtils {
   // FIXME: We should have `BindingIdentifier` vs. `Identifier`, so that
   // `BindingIdentifier` can be part of Pattern, but that would require some
   // breaking changes.
-  parseBindingAtom(): N.ArrayPattern | ObjectPattern | Identifier {
+  parseBindingAtom(): N.BindingPattern | N.BindingIdentifier {
     // https://tc39.es/ecma262/#prod-BindingPattern
     switch (this.state.type) {
       case tt.bracketL: {
-        const node = this.startNode<N.ArrayPattern>();
+        const node = this.startNode<N.ArrayBindingPattern>();
         this.next();
-        node.elements = <N.PatternLike[]>this.parseBindingList(
+        node.elements = <N.BindingElementList>this.parseBindingList(
           tt.bracketR,
           charCodes.rightSquareBracket,
           true,
         );
-        return this.finishNode(node, "ArrayPattern");
+        return this.finishNode(node, "ArrayBindingPattern");
       }
 
       case tt.braceL:
-        return this.parseObjectLike<ObjectPattern>(tt.braceR, true);
+        return this.parseObjectLike<N.ObjectBindingPattern>(tt.braceR, true);
     }
 
     // https://tc39.es/ecma262/#prod-BindingIdentifier
-    return this.parseIdentifier();
+    return this.parseIdentifier<N.BindingIdentifier>();
   }
 
   // https://tc39.es/ecma262/#prod-BindingElementList
@@ -422,8 +409,8 @@ export default abstract class LValParser extends NodeUtils {
     closeCharCode: CharCode,
     allowEmpty: boolean = false,
     allowModifiers: boolean = false,
-  ): readonly BindingListElement[] {
-    const elts: BindingList = [];
+  ): N.BindingElementList {
+    const elts: N.BindingElementList = [];
     let first = true;
     while (!this.eat(close)) {
       if (first) {
@@ -460,23 +447,24 @@ export default abstract class LValParser extends NodeUtils {
   }
 
   // https://tc39.es/ecma262/#prod-BindingRestProperty
-  parseBindingRestProperty(prop: RestElement): RestElement {
+  parseBindingRestProperty(): N.BindingRestProperty {
+    const bindingRestProperty = this.startNode<N.BindingRestElement>()
     this.next(); // eat '...'
     // Don't use parseRestBinding() as we only allow Identifier here.
-    prop.argument = this.parseIdentifier();
+    bindingRestProperty.argument = this.parseIdentifier<N.BindingIdentifier>();
     this.checkCommaAfterRest(charCodes.rightCurlyBrace);
-    return this.finishNode(prop, "RestElement");
+    return this.finishNode(bindingRestProperty, "BindingRestProperty");
   }
 
   // https://tc39.es/ecma262/#prod-BindingProperty
-  parseBindingProperty(): N.ObjectProperty | N.RestElement {
+  parseBindingProperty(): N.BindingProperty | N.BindingRestElement {
     const { type } = this.state;
     if (type === tt.ellipsis) {
-      return this.parseBindingRestProperty(this.startNode<N.RestElement>());
+      return this.parseBindingRestProperty();
     }
 
     const { start: startPos, startLoc } = this.state;
-    const prop = this.startNode<N.ObjectProperty>();
+    const prop = this.startNode<N.BindingProperty>();
 
     if (type === tt.privateName) {
       this.expectPlugin("destructuringPrivate", startLoc);
@@ -501,7 +489,7 @@ export default abstract class LValParser extends NodeUtils {
 
   parseAssignableListItem(
     allowModifiers: boolean,
-    decorators: Decorator[],
+    decorators: N.Decorator[],
   ): BindingListElement {
     const left = this.parseMaybeDefault();
     this.parseAssignableListItemTypes(left);
@@ -513,7 +501,8 @@ export default abstract class LValParser extends NodeUtils {
   }
 
   // Used by flow/typescript plugin to add type annotations to binding elements
-  parseAssignableListItemTypes(param: N.PatternLike | N.RestElement): N.PatternLike | N.RestElement {
+  // : N.BindingPattern | N.BindingRestElement
+  parseAssignableListItemTypes(param: N.BindingPattern | N.BindingRestElement) {
     return param;
   }
 
@@ -523,7 +512,7 @@ export default abstract class LValParser extends NodeUtils {
     startPos: number = this.state.start,
     startLoc: Position = this.state.startLoc,
     left: AssignmentTarget = this.parseBindingAtom(),
-  ): N.PatternLike {
+  ): N.BindingPattern {
     if (!this.eat(tt.eq)) return left;
 
     const node = this.startNodeAt<N.AssignmentPattern>(startPos, startLoc);
@@ -549,7 +538,7 @@ export default abstract class LValParser extends NodeUtils {
    * @memberof LValParser
    */
   checkLVal(
-    expr: Expression | N.PatternLike | N.RestElement,
+    expr: N.Expression | N.BindingIdentifier | N.BindingPattern | N.BindingRestElement,
     contextDescription: string,
     bindingType: BindingTypes = BIND_NONE,
     checkClashes?: Set<string>,
@@ -669,7 +658,7 @@ export default abstract class LValParser extends NodeUtils {
     }
   }
 
-  checkToRestConversion(node: SpreadElement): void {
+  checkToRestConversion(node: N.SpreadElement): void {
     if (
       node.argument.type !== "Identifier" &&
       node.argument.type !== "MemberExpression"
