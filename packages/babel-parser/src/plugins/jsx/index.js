@@ -51,7 +51,7 @@ const JsxErrors = toParseErrorClasses(
         `Unexpected token \`${found}\`. Did you mean \`${HTMLEntity}\` or \`{'${found}'}\`?`
     ),
   }),
-  /* syntaxPlugin */ "jsx"
+  { syntaxPlugin: "jsx" }
 );
 
 
@@ -311,7 +311,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
           this.next();
           node = this.jsxParseExpressionContainer(node, tc.j_oTag);
           if (node.expression.type === "JSXEmptyExpression") {
-            this.raise(JsxErrors.AttributeIsEmpty, { node });
+            this.raise(JsxErrors.AttributeIsEmpty, { at: node });
           }
           return node;
 
@@ -366,7 +366,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
             !expression.extra?.parenthesized
           ) {
             this.raise(JsxErrors.UnexpectedSequenceExpression, {
-              node: expression.expressions[1],
+              at: expression.expressions[1],
             });
           }
         }
@@ -497,12 +497,13 @@ export default (superClass: Class<Parser>): Class<Parser> =>
           closingElement !== null
         ) {
           this.raise(JsxErrors.MissingClosingTagFragment, {
-            node: closingElement,
+            at: closingElement,
           });
         } else if (!isFragment(openingElement) && isFragment(closingElement)) {
           this.raise(JsxErrors.MissingClosingTagElement, {
+            // $FlowIgnore
             at: closingElement,
-            openingElement: getQualifiedJSXName(openingElement.name),
+            openingTagName: getQualifiedJSXName(openingElement.name),
           });
         } else if (!isFragment(openingElement) && !isFragment(closingElement)) {
           if (
@@ -511,8 +512,9 @@ export default (superClass: Class<Parser>): Class<Parser> =>
             getQualifiedJSXName(openingElement.name)
           ) {
             this.raise(JsxErrors.MissingClosingTagElement, {
+              // $FlowIgnore
               at: closingElement,
-              openingElement: getQualifiedJSXName(openingElement.name),
+              openingTagName: getQualifiedJSXName(openingElement.name),
             });
           }
         }
