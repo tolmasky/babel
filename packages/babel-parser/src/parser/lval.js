@@ -571,7 +571,7 @@ export default class LValParser extends NodeUtils {
         bindingType === BIND_NONE
           ? Errors.InvalidLhs
           : Errors.InvalidLhsBinding,
-          { at: expr, inNodeType },
+        { at: expr, inNodeType },
       );
       return;
     }
@@ -580,7 +580,13 @@ export default class LValParser extends NodeUtils {
 
     for (const child of [].concat(expr[key])) {
       if (child) {
-        this.checkLVal(child, relevantType, bindingType, checkClashes, disallowLetBinding);
+        this.checkLVal(
+          child,
+          relevantType,
+          bindingType,
+          checkClashes,
+          disallowLetBinding,
+        );
       }
     }
   }
@@ -613,11 +619,11 @@ export default class LValParser extends NodeUtils {
 }
 
 const LValTraversalKeys = Object.assign(Object.create(null), {
-  "AssignmentPattern": [true, "left"],
-  "RestElement": [true, "argument"],
-  "ParenthesizedExpression": [true, "expression"],
-  "ObjectProperty": [false, "value"],
-  "Property": [false, "value"],
-  "ArrayPattern": [true, "elements"],
-  "ObjectPattern": [true, "properties"],
+  AssignmentPattern: [true, "left"],
+  RestElement: [true, "argument"],
+  ParenthesizedExpression: [true, "expression"],
+  ObjectProperty: [false, "value"],
+  Property: [false, "value"],
+  ArrayPattern: [true, "elements"],
+  ObjectPattern: [true, "properties"],
 });
