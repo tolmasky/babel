@@ -55,11 +55,14 @@ declare function toParseErrorClass<T: string>(
   T,
   ?{ code?: ParseErrorCode },
 ): Class<ParseError<{||}>>;
+
+// eslint-disable-next-line no-redeclare
 declare function toParseErrorClass<T>(
   (T) => string,
   ?{ code?: ParseErrorCode },
 ): Class<ParseError<T>>;
 
+// eslint-disable-next-line no-redeclare
 export function toParseErrorClass(toMessageOrMessage, properties) {
   return fromToMessage(
     typeof toMessageOrMessage === "string"
@@ -92,7 +95,7 @@ function fromToMessage<T>(
 
 export function toParseErrorClasses<T: Object>(
   toClasses: (typeof toParseErrorClass) => T,
-  { syntaxPlugin, code }: Object = {},
+  { syntaxPlugin }: Object = {},
 ): T {
   // $FlowIgnore
   return Object.fromEntries(
