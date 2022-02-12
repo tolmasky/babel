@@ -127,11 +127,11 @@ export default (_: typeof toParseErrorClass) => ({
   InvalidIdentifier: _<{| identifier: string |}>(
     ({ identifier }) => `Invalid identifier ${identifier}.`,
   ),
-  InvalidLhs: _<{| construct: string /*"for-loop"*/ |}>(
-    ({ construct }) => `Invalid left-hand side in ${construct}.`,
+  InvalidLhs: _<{| inNodeType: string |}>(
+    ({ inNodeType }) => `Invalid left-hand side in ${nodeTypeToDescription(inNodeType)}.`,
   ),
-  InvalidLhsBinding: _<{| construct: string |}>(
-    ({ construct }) => `Binding invalid left-hand side in ${construct}.`,
+  InvalidLhsBinding: _<{| inNodeType: string |}>(
+    ({ inNodeType }) => `Binding invalid left-hand side in ${nodeTypeToDescription(inNodeType)}.`,
   ),
   InvalidNumber: _("Invalid number."),
   InvalidOrMissingExponent: _(
@@ -382,3 +382,9 @@ export default (_: typeof toParseErrorClass) => ({
     "Numeric separator can not be used after leading 0.",
   ),
 });
+
+const nodeTypeToDescription = type => type === "ArrayPattern"
+  ? "array destructuring pattern"
+  : type === "ObjectPattern"
+  ? "object destructuring pattern"
+  : type.replace(/[a-z][A-Z]/, ([left, right]) => `${left} ${right}`).toLowerCase();
