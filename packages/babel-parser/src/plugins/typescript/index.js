@@ -3209,7 +3209,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
 
     checkLVal(
       expr: N.Expression,
-      contextDescription: string,
+      inNodeType: string,
       ...args:
         | [BindingTypes | void]
         | [BindingTypes | void, ?Set<string>, boolean | void, boolean | void]
@@ -3227,22 +3227,19 @@ export default (superClass: Class<Parser>): Class<Parser> =>
         case "TSTypeAssertion":
           if (
             /*bindingType*/ !args[0] &&
-            contextDescription !== "parenthesized expression" &&
+            inNodeType !== "ParenthesizedExpression" &&
             !expr.extra?.parenthesized
           ) {
-            this.raise(Errors.InvalidLhs, {
-              at: expr,
-              construct: contextDescription,
-            });
+            this.raise(Errors.InvalidLhs, { at: expr, inNodeType });
             break;
           }
-          this.checkLVal(expr.expression, "parenthesized expression", ...args);
+          this.checkLVal(expr.expression, "ParenthesizedExpression", ...args);
           return;
         case "TSNonNullExpression":
-          this.checkLVal(expr.expression, contextDescription, ...args);
+          this.checkLVal(expr.expression, inNodeType, ...args);
           return;
         default:
-          super.checkLVal(expr, contextDescription, ...args);
+          super.checkLVal(expr, inNodeType, ...args);
           return;
       }
     }
