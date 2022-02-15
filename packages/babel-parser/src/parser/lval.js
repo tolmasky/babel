@@ -545,7 +545,7 @@ export default class LValParser extends NodeUtils {
       return;
     }
 
-    if (type === "Identifier") {
+    if (expr.type === "Identifier") {
       const { name } = expr;
       if (
         this.state.strict &&
@@ -575,7 +575,7 @@ export default class LValParser extends NodeUtils {
         this.raise(Errors.LetInLexicalBinding, { at: expr });
       }
       if (!(bindingType & BIND_NONE)) {
-        this.declareNameFromIdentifier(<Identifier>expr, bindingType);
+        this.declareNameFromIdentifier((expr: Identifier), bindingType);
       }
       return;
     }
