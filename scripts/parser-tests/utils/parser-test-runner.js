@@ -49,7 +49,6 @@ class TestRunner {
       this.parse(test, parser);
       test.actualError = false;
     } catch (err) {
-      console.log("FOR", test.fileName, "THE ERROR WAS", err);
       test.actualError = true;
     }
 
@@ -59,11 +58,9 @@ class TestRunner {
   }
 
   parse(test, parser) {
-    const { contents, sourceType, plugins } = test;
-    const files =
-      typeof contents === "string" ? [[test.fileName, contents]] : contents;
+    const tests = typeof test.contents === "string" ? [test] : test.contents;
 
-    for (const [sourceFilename, contents] of files) {
+    for (const { contents, sourceType, plugins, sourceFilename } of tests) {
       parser(contents, { sourceType, plugins, sourceFilename });
     }
   }
@@ -211,7 +208,12 @@ class TestRunner {
 
       badnews.push(desc);
       badnewsDetails.push(desc + ":");
-      badnewsDetails.push(...tests.map(test => `  ${test.id || test}`));
+      badnewsDetails.push(
+        ...tests.map(
+          test =>
+            `  ${test.id || test} ${test.expectedError} ${test.actualError}`
+        )
+      );
     });
 
     console.log(`Testing complete (${summary.count} tests).`);
