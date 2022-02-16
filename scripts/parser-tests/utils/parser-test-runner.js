@@ -58,11 +58,13 @@ class TestRunner {
   }
 
   parse(test, parser) {
-    parser(test.contents, {
-      sourceType: test.sourceType,
-      plugins: test.plugins,
-      sourceFilename: test.fileName,
-    });
+    const { contents, sourceType, plugins } = test;
+    const files =
+      typeof contents === "string" ? [[test.fileName, contents]] : contents;
+
+    for (const [sourceFilename, contents] of files) {
+      parser(contents, { sourceType, plugins, sourceFilename });
+    }
   }
 
   async getAllowlist() {

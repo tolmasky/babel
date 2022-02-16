@@ -58,8 +58,17 @@ const runner = new TestRunner({
         isTSX ? ts.ScriptKind.TSX : ts.ScriptKind.TS
       );
 
+      const files = splitTwoslashCodeInfoFiles(
+        test.contents,
+        "default",
+        `${test.name}/`
+      ).map(([filename, lines]) => [
+        filename.replace(/\/default$/, ""),
+        lines.join("\n"),
+      ]);
+
       yield {
-        contents: test.contents,
+        contents: files.length === 1 ? test.contents : files,
         fileName: test.name,
         id: test.name,
         expectedError:
@@ -76,3 +85,33 @@ runner.run().catch(err => {
   console.error(err);
   process.exitCode = 1;
 });
+
+// From: https://github.com/microsoft/TypeScript-Website/blob/v2/packages/ts-twoslasher/src/index.ts
+const splitTwoslashCodeInfoFiles = (code, defaultFileName, root = "") => {
+  const lines = code.split(/\r\n?|\n/g);
+
+  let nameForFile = code.includes(`@filename: ${defaultFileName}`)
+    ? "global.ts"
+    : defaultFileName;
+  let currentFileContent = [];
+  const fileMap = [];
+
+  for (const line of lines) {
+    if (line.includes("// @filename: ")) {
+      fileMap.push([root + nameForFile, currentFileContent]);
+      nameForFile = line.split("// @filename: ")[1].trim();
+      currentFileContent = [];
+    } else {
+      currentFileContent.push(line);
+    }
+  }
+  fileMap.push([root + nameForFile, currentFileContent]);
+
+  // Basically, strip these:
+  // ["index.ts", []]
+  // ["index.ts", [""]]
+  const nameContent = fileMap.filter(
+    n => n[1].length > 0 && (n[1].length > 1 || n[1][0] !== "")
+  );
+  return nameContent;
+};
