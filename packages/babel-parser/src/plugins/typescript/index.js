@@ -3527,7 +3527,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
 
       return (
         DTSTruthy ||
-        (!DTSFalse && this.filename && /\.d\.ts$/.test(this.filename))
+        (!DTSFalse && !!this.filename && /\.d\.ts$/.test(this.filename))
       );
     }
 
