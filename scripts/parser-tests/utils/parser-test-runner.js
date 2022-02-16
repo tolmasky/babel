@@ -49,6 +49,7 @@ class TestRunner {
       this.parse(test, parser);
       test.actualError = false;
     } catch (err) {
+      console.log("FOR", test.fileName, "THE ERROR WAS", err);
       test.actualError = true;
     }
 

@@ -66,7 +66,7 @@ const runner = new TestRunner({
         filename.replace(/\/default$/, ""),
         lines.join("\n"),
       ]);
-
+      console.log("WILL USE", files.length === 1 ? test.contents : files);
       yield {
         contents: files.length === 1 ? test.contents : files,
         fileName: test.name,
