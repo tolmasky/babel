@@ -2169,7 +2169,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
           ? "TSDeclareMethod"
           : undefined;
       if (bodilessType && !this.match(tt.braceL) && this.isLineTerminator()) {
-        if (!node.abstract && !this.state.inAmbientContext) {
+        if (!node.abstract && !this.state.isAmbientContext) {
           this.raise(
             bodilessType === "TSDeclareMethod" && node.kind === "constructor"
               ? TSErrors.ConstructorImplementationIsMissing
@@ -2401,7 +2401,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
     ): void {
       // Strict mode words may be allowed as in `declare namespace N { const static: number; }`.
       // And we have a type checker anyway, so don't bother having the parser do it.
-      if (!this.state.inAmbientContext) {
+      if (!this.state.isAmbientContext) {
         super.checkReservedWord(word, startLoc, checkKeywords, isBinding);
       }
     }
