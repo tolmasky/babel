@@ -97,7 +97,7 @@ const TSErrors = toParseErrorClasses(
       "Type parameters cannot appear on a constructor declaration.",
     ),
     ConstructorImplementationIsMissing: _(
-      "Constructor implementation is missing."
+      "Constructor implementation is missing.",
     ),
     // kind?
     DeclareAccessor: _<{| accessorKind: "get" | "set" |}>(
@@ -126,7 +126,7 @@ const TSErrors = toParseErrorClasses(
       "'export declare' must be followed by an ambient declaration.",
     ),
     FunctionImplementationIsMissingOrNotImmediatelyFollowingTheDeclaration: _(
-      "Function implementation is missing or not immediately following the declaration."
+      "Function implementation is missing or not immediately following the declaration.",
     ),
     ImportAliasHasImportType: _("An import alias can not use 'import type'."),
     IncompatibleModifiers: _<{| modifiers: [TsModifier, TsModifier] |}>(
@@ -2174,7 +2174,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
             bodilessType === "TSDeclareMethod" && node.kind === "constructor"
               ? TSErrors.ConstructorImplementationIsMissing
               : TSErrors.FunctionImplementationIsMissingOrNotImmediatelyFollowingTheDeclaration,
-            { at: node }
+            { at: node },
           );
         }
         this.finishNode(node, bodilessType);
@@ -2394,15 +2394,16 @@ export default (superClass: Class<Parser>): Class<Parser> =>
     }
 
     checkReservedWord(
-      word: string, // eslint-disable-line no-unused-vars
-      startLoc: Position, // eslint-disable-line no-unused-vars
-      checkKeywords: boolean, // eslint-disable-line no-unused-vars
-      // eslint-disable-next-line no-unused-vars
+      word: string,
+      startLoc: Position,
+      checkKeywords: boolean,
       isBinding: boolean,
     ): void {
-      // Don't bother checking for TypeScript code.
       // Strict mode words may be allowed as in `declare namespace N { const static: number; }`.
       // And we have a type checker anyway, so don't bother having the parser do it.
+      if (!this.state.inAmbientContext) {
+        super.checkReservedWord(word, startLoc, checkKeywords, isBinding);
+      }
     }
 
     /*
