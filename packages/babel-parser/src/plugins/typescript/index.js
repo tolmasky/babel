@@ -96,6 +96,9 @@ const TSErrors = toParseErrorClasses(
     ConstructorHasTypeParameters: _(
       "Type parameters cannot appear on a constructor declaration.",
     ),
+    ConstructorImplementationIsMissing: _(
+      "Constructor implementation is missing."
+    ),
     // kind?
     DeclareAccessor: _<{| accessorKind: "get" | "set" |}>(
       ({ accessorKind }) => `'declare' is not allowed in ${accessorKind}ters.`,
@@ -121,6 +124,9 @@ const TSErrors = toParseErrorClasses(
     EmptyTypeParameters: _("Type parameter list cannot be empty."),
     ExpectedAmbientAfterExportDeclare: _(
       "'export declare' must be followed by an ambient declaration.",
+    ),
+    FunctionImplementationIsMissingOrNotImmediatelyFollowingTheDeclaration: _(
+      "Function implementation is missing or not immediately following the declaration."
     ),
     ImportAliasHasImportType: _("An import alias can not use 'import type'."),
     IncompatibleModifiers: _<{| modifiers: [TsModifier, TsModifier] |}>(
@@ -2163,6 +2169,14 @@ export default (superClass: Class<Parser>): Class<Parser> =>
           ? "TSDeclareMethod"
           : undefined;
       if (bodilessType && !this.match(tt.braceL) && this.isLineTerminator()) {
+        if (!this.state.inAmbientContext) {
+          this.raise(
+            bodilessType === "TSDeclareMethod" && node.kind === "constructor"
+              ? TSErrors.ConstructorImplementationIsMissing
+              : TSErrors.FunctionImplementationIsMissingOrNotImmediatelyFollowingTheDeclaration,
+            { at: node }
+          );
+        }
         this.finishNode(node, bodilessType);
         return;
       }
