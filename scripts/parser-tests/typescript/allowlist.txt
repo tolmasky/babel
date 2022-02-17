@@ -1,14 +1,4 @@
-ArrowFunctionExpression1.ts
-MemberAccessorDeclaration15.ts
-ParameterList13.ts
-ParameterList4.ts
-ParameterList5.ts
-ParameterList6.ts
-abstractPropertyNegative.ts
 accessorBodyInTypeContext.ts
-accessorParameterAccessibilityModifier.ts
-accessorWithoutBody1.ts
-accessorWithoutBody2.ts
 aliasUsageInAccessorsOfClass.ts
 aliasUsageInArray.ts
 aliasUsageInFunctionExpression.ts
@@ -39,7 +29,6 @@ augmentedTypesVar.ts
 binderBinaryExpressionStress.ts
 binderBinaryExpressionStressJs.ts
 bundledDtsLateExportRenaming.ts
-callOverloads2.ts
 checkSuperCallBeforeThisAccessing9.ts
 classCannotExtendVar.ts
 classExtendsMultipleBaseClasses.ts
@@ -151,7 +140,6 @@ importNonExportedMember8.ts
 importNonExportedMember9.ts
 importWithTrailingSlash.ts
 importedModuleClassNameClash.ts
-indexSignatureWithAccessibilityModifier.ts
 indexSignatureWithInitializer1.ts
 indexSignatureWithTrailingComma.ts
 indexTypeCheck.ts
@@ -205,7 +193,6 @@ noImplicitAnyDestructuringVarDeclaration.ts
 noSymbolForMergeCrash.ts
 nodeModuleReexportFromDottedPath.ts
 nonMergedOverloads.ts
-objectLiteralMemberWithoutBlock1.ts
 outModuleConcatAmd.ts
 outModuleConcatCommonjs.ts
 outModuleConcatCommonjsDeclarationOnly.ts
@@ -214,14 +201,12 @@ outModuleConcatSystem.ts
 outModuleConcatUmd.ts
 outModuleTripleSlashRefs.ts
 parameterInitializerBeforeDestructuringEmit.ts
-parameterPropertyOutsideConstructor.ts
 parserConstructorDeclaration12.ts
 preserveUnusedImports.ts
 privacyCheckExternalModuleExportAssignmentOfGenericClass.ts
 privacyTopLevelAmbientExternalModuleImportWithExport.ts
 privacyTopLevelAmbientExternalModuleImportWithoutExport.ts
 reExportUndefined1.ts
-readonlyInNonPropertyParameters.ts
 recursiveExportAssignmentAndFindAliasedType1.ts
 recursiveExportAssignmentAndFindAliasedType2.ts
 recursiveExportAssignmentAndFindAliasedType3.ts
