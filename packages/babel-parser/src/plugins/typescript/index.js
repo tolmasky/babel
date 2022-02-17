@@ -2593,8 +2593,13 @@ export default (superClass: Class<Parser>): Class<Parser> =>
         return this.tsParseEnumDeclaration(node, /* isConst */ false);
       } else if (this.state.type === tt._interface) {
         const interfaceNode = this.startNode();
-        this.next();
-        return this.tsParseInterfaceDeclaration(interfaceNode);
+        if (
+          this.tsCheckLineTerminator(true) &&
+          tokenIsIdentifier(this.state.type)
+        ) {
+          return this.tsParseInterfaceDeclaration(interfaceNode);
+        }
+        return super.parseStatementContent(context, topLevel);
       }
 
       return super.parseStatementContent(context, topLevel);
