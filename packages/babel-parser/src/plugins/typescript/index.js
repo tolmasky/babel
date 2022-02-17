@@ -2587,7 +2587,12 @@ export default (superClass: Class<Parser>): Class<Parser> =>
           this.expectContextual(tt._enum);
           return this.tsParseEnumDeclaration(node, /* isConst */ true);
         }
+      } else if (this.state.type === tt._interface) {
+        const interfaceNode = this.startNode();
+        this.next();
+        return this.tsParseInterfaceDeclaration(interfaceNode);
       }
+
       return super.parseStatementContent(context, topLevel);
     }
 
