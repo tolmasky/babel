@@ -25,35 +25,11 @@ const TSTestsPath = path.join(dirname, "../../../build/typescript/tests");
 // Check if the baseline errors contain the codes that should also be thrown from babel-parser
 function baselineContainsParserErrorCodes(testName) {
   try {
-    if (testName.includes("aliasErrors")) {
-      console.log(
-        "WILL TEST " +
-          path.join(
-            TSTestsPath,
-            "baselines/reference",
-            testName.replace(/\.tsx?$/, ".errors.txt")
-          )
-      );
-      console.log(
-        "WILL TEST " +
-          fs.readFileSync(
-            path.join(
-              TSTestsPath,
-              "baselines/reference",
-              testName.replace(/\.tsx?$/, ".errors.txt")
-            ),
-            "utf8"
-          )
-      );
-    }
-    return ErrorCodeRegExp.test(
-      fs.readFileSync(
-        path.join(
-          TSTestsPath,
-          "baselines/reference",
-          testName.replace(/\.tsx?$/, ".errors.txt")
-        ),
-        "utf8"
+    return fs.existsSync(
+      path.join(
+        TSTestsPath,
+        "baselines/reference",
+        testName.replace(/\.tsx?$/, ".errors.txt")
       )
     );
   } catch (e) {
