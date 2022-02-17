@@ -2169,7 +2169,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
           ? "TSDeclareMethod"
           : undefined;
       if (bodilessType && !this.match(tt.braceL) && this.isLineTerminator()) {
-        if (!this.state.inAmbientContext) {
+        if (!node.abstract && !this.state.inAmbientContext) {
           this.raise(
             bodilessType === "TSDeclareMethod" && node.kind === "constructor"
               ? TSErrors.ConstructorImplementationIsMissing
