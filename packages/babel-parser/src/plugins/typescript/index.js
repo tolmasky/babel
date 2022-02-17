@@ -2588,11 +2588,9 @@ export default (superClass: Class<Parser>): Class<Parser> =>
           return this.tsParseEnumDeclaration(node, /* isConst */ true);
         }
       } else if (this.state.type === tt._enum) {
+        const node: N.TsEnumDeclaration = this.startNode();
         this.next();
-        return this.tsParseEnumDeclaration(
-          this.startNode(),
-          /* isConst */ false,
-        );
+        return this.tsParseEnumDeclaration(node, /* isConst */ false);
       } else if (this.state.type === tt._interface) {
         const interfaceNode = this.startNode();
         this.next();
