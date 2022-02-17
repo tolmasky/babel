@@ -252,6 +252,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
     ): T {
       let funcNode = this.startNode();
       funcNode.kind = node.kind; // provide kind, so super method correctly sets state
+      if (node.abstract) funcNode.abstract = node.abstract;
       funcNode = super.parseMethod(
         funcNode,
         isGenerator,
@@ -261,6 +262,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
         type,
         inClassScope,
       );
+      if (node.abstract) delete funcNode.abstract;
       funcNode.type = "FunctionExpression";
       delete funcNode.kind;
       // $FlowIgnore
