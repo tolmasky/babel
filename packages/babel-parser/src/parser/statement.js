@@ -211,6 +211,7 @@ export default class StatementParser extends ExpressionParser {
   ): N.Program {
     program.sourceType = sourceType;
     program.interpreter = this.parseInterpreterDirective();
+    program.directives = [];
     this.parseScriptOrModuleBody(program, end);
     return this.finishNode<N.Program>(program, "Program");
   }
@@ -1028,12 +1029,9 @@ export default class StatementParser extends ExpressionParser {
   }
 
   parseScriptOrModuleBody(node: N.BlockStatementLike, end: TokenType): void {
-    const body = (node.body = []);
-    const directives = (node.directives = []);
-
     this.parseBlockOrModuleBlockBody(
-      body,
-      directives,
+      node.body = [],
+      node.directives,
       true /* topLevel */,
       end,
     );

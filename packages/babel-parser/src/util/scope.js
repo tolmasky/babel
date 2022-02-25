@@ -57,7 +57,7 @@ export class Scope {
       // In strict mode, scope.functions will always be empty.
       // Modules are strict by default, but the `scriptMode` option
       // can overwrite this behavior.
-      !this.functions.has(name)
+      this.functions.has(name)
     );
   }
 }
@@ -168,13 +168,11 @@ export default class ScopeHandler<IScope: Scope = Scope> {
         if (scope.flags & SCOPE_VAR) break;
       }
     }
-    if (this.parser.inModule && isExportCompatibleScope(scope)) {
-      scope.exports.undefinedLocalNames.delete(name);
-    }
+    this.maybeExportDefined(scope, name);
   }
 
   maybeExportDefined(scope: IScope, name: string) {
-    if (this.parser.inModule && isExportCompatibleScope(scope.flags)) {
+    if (this.parser.inModule && isExportCompatibleScope(scope)) {
       scope.exports.undefinedLocalNames.delete(name);
     }
   }

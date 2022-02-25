@@ -82,6 +82,9 @@ const TSErrors = toParseErrorClasses`typescript`(_ => ({
   AccesorCannotHaveTypeParameters: _(
     "An accessor cannot have type parameters.",
   ),
+  ADefaultExportCanOnlyBeUsedInAnECMAScriptStyleModule: _(
+    "A default export can only be used in an ECMAScript-style module",
+  ),
   CannotFindName: _<{| name: string |}>(
     ({ name }) => `Cannot find name '${name}'.`,
   ),
@@ -121,6 +124,9 @@ const TSErrors = toParseErrorClasses`typescript`(_ => ({
   EmptyTypeParameters: _("Type parameter list cannot be empty."),
   ExpectedAmbientAfterExportDeclare: _(
     "'export declare' must be followed by an ambient declaration.",
+  ),
+  ExportDeclarationsAreNotPermittedInANamespace: _(
+    "Export declarations are not permitted in a namespace",
   ),
   ImportAliasHasImportType: _("An import alias can not use 'import type'."),
   IncompatibleModifiers: _<{| modifiers: [TsModifier, TsModifier] |}>(
@@ -2855,6 +2861,32 @@ export default (superClass: Class<Parser>): Class<Parser> =>
       }
 
       return declaration;
+    }
+
+    checkExport(node) {
+      super.checkExport(node);
+
+      if (!(this.scope.currentScope().flags & SCOPE_TS_MODULE)) return;
+
+      // If we're in an ambient context, or we have a node source, then we can't
+      // be sure that this isn't a valid dts re-export, so we'll just treat it
+      // as allowed since we there isn't enough information just in the contents
+      // of this file to definitively know that it is an invalid export.
+      if (this.state.isAmbientContext || node.source) return;
+
+      if (node.specifiers && node.specifiers.length > 0) {
+        const hasNamedExport = node.specifiers.some(
+          specifier => specifier.type === "ExportNamedDeclaration",
+        );
+        this.raise(
+          hasNamedExport
+            ? TSErrors.ExportDeclarationsAreNotPermittedInANamespace
+            : TSErrors.ADefaultExportCanOnlyBeUsedInAnECMAScriptStyleModule,
+          {
+            at: node,
+          },
+        );
+      }
     }
 
     parseClassId(

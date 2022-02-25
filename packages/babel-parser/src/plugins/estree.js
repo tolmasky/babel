@@ -146,11 +146,21 @@ export default (superClass: Class<Parser>): Class<Parser> =>
       );
     }
 
+    parseScriptOrModuleBody(node: N.BlockStatementLike, end: TokenType): void {
+      super.parseScriptOrModuleBody(node, end);
+      this.removeDirectives(node);
+    }
+
     parseBlockBody(
       node: N.BlockStatementLike,
       ...args: [?boolean, boolean, TokenType, void | (boolean => void)]
     ): void {
       super.parseBlockBody(node, ...args);
+      this.removeDirectives(node);
+    }
+
+    removeDirectives(node: N.BlockStatementLike) {
+      if (!node.directives) return;
 
       const directiveStatements = node.directives.map(d =>
         this.directiveToStmt(d),
