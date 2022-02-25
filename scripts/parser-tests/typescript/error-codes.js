@@ -64,10 +64,12 @@ export default [
   "TS1212", // Identifier expected. '{0}' is a reserved word in strict mode."
   "TS1213", // Identifier expected. '{0}' is a reserved word in strict mode. Class definitions are automatically in strict mode.
   "TS1214", // Identifier expected. '{0}' is a reserved word in strict mode. Modules are automatically in strict mode.
+  "TS1215", // Invalid use of 'arguments'. Modules are automatically in strict mode.
   "TS1246", // An interface property cannot have an initializer.
   "TS1247", // A type literal property cannot have an initializer.
   "TS1248", // A class member cannot have the 'const' keyword.
   "TS1260", // Keywords cannot contain escape characters.
+  "TS1254", // A 'const' initializer in an ambient context must be a string or numeric literal or literal enum reference.
   "TS1308", // 'await' expression is only allowed within an async function.
   "TS1312", // '=' can only be used in an object literal property inside a destructuring assignment.
   "TS1384", // A 'new' expression with type arguments must always be followed by a parenthesized argument list.
@@ -81,6 +83,7 @@ export default [
   // "TS2369", // A parameter property is only allowed in a constructor implementation.
   // "TS2371", // A parameter initializer is only allowed in a function or constructor implementation.
   //"TS2393", // Duplicate function implementation.
+  // "TS2395", // Individual declarations in merged declaration 'f' must be all exported or all local.
   "TS2396", // Duplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.
   // "TS2440", // Import declaration conflicts with local declaration of '{0}'.
   // "TS2451", // Cannot redeclare block-scoped variable '{0}'.

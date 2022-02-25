@@ -63,6 +63,7 @@ function baselineContainsParserErrorCodes(testName) {
 
 const IgnoreRegExp = /@noTypesAndSymbols|ts-ignore|\n#!/;
 const AlwaysStrictRegExp = /(^|\n)\/\/\s*@alwaysStrict:\s*true/;
+const ScriptTarget = /(^|\n)\/\/\s*@target:\s*es(3|5)/;
 
 const runner = new TestRunner({
   testDir: path.join(TSTestsPath, "./cases/compiler"),
@@ -77,8 +78,9 @@ const runner = new TestRunner({
         continue;
       }
 
+      const sourceType = "unambiguous";
       const strictMode = AlwaysStrictRegExp.test(test.contents) || void 0;
-      const files = toFiles(strictMode, test.contents, test.name);
+      const files = toFiles(sourceType, strictMode, test.contents, test.name);
       const expectedError =
         files.length > 0 && baselineContainsParserErrorCodes(test.name);
 
@@ -87,7 +89,7 @@ const runner = new TestRunner({
   },
 });
 
-function toFiles(strictMode, contents, name) {
+function toFiles(sourceType, strictMode, contents, name) {
   return splitTwoslashCodeInfoFiles(contents, "default", `${name}/`)
     .map(([filename, lines]) => [
       filename.replace(/\/default$/, ""),
@@ -101,7 +103,7 @@ function toFiles(strictMode, contents, name) {
     .map(([sourceFilename, contents]) => ({
       contents,
       sourceFilename,
-      sourceType: "unambiguous",
+      sourceType,
       strictMode,
       plugins: /\.(t|j)sx$/.test(sourceFilename) ? pluginsWithJSX : plugins,
     }));
@@ -140,8 +142,11 @@ function splitTwoslashCodeInfoFiles(code, defaultFileName, root = "") {
   // ["index.ts", []]
   // ["index.ts", [""]]
   const nameContent = fileMap.filter(
-    n => n[1].length > 0 && (n[1].length > 1 || n[1][0] !== "")
+    n => n[1].length > 2 ||
+      n[1].length === 1 && n[1][0] !== "" ||
+      n[1].length === 2 && n[1][0] !== "content not parsed" && n[1][0] !== ""
   );
+
   return nameContent;
 }
 

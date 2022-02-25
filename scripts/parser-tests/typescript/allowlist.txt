@@ -50,8 +50,6 @@ duplicateIdentifierEnum.ts
 duplicateIdentifierInCatchBlock.ts
 duplicateLabel1.ts
 duplicateLabel2.ts
-duplicatePackage.ts
-duplicatePackage_withErrors.ts
 duplicateVarAndImport.ts
 duplicateVarAndImport2.ts
 dynamicImportTrailingComma.ts
@@ -59,6 +57,9 @@ emptyGenericParamList.ts
 emptyTypeArgumentList.ts
 emptyTypeArgumentListWithNew.ts
 enumGenericTypeClash.ts
+exportDeclarationsInAmbientNamespaces2.ts
+exportDefaultAsyncFunction2.ts
+exportSameNameFuncVar.ts
 # We don't support ES3-style octal literal errors.
 es3-oldStyleOctalLiteralInEnums.ts
 es3-oldStyleOctalLiteralTypes.ts
@@ -121,6 +122,7 @@ moduleSharesNameWithImportDeclarationInsideIt5.ts
 multipleClassPropertyModifiersErrors.ts
 multipleInheritance.ts
 nameCollisions.ts
+nonMergedOverloads.ts
 noImplicitAnyDestructuringVarDeclaration.ts
 parameterInitializerBeforeDestructuringEmit.ts
 parameterPropertyOutsideConstructor.ts
