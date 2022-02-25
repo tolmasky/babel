@@ -18,9 +18,7 @@ export default class BaseParser {
   declare expressionScope: ExpressionScopeHandler;
   declare plugins: PluginsMap;
   declare filename: ?string;
-  // Names of exports store. `default` is stored as a name for both
-  // `export default foo;` and `export { foo as default };`.
-  declare exportedIdentifiers: Set<string>;
+
   sawUnambiguousESM: boolean = false;
   ambiguousScriptDifferentAst: boolean = false;
 

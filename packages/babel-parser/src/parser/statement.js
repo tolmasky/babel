@@ -211,16 +211,7 @@ export default class StatementParser extends ExpressionParser {
   ): N.Program {
     program.sourceType = sourceType;
     program.interpreter = this.parseInterpreterDirective();
-    this.parseBlockBody(program, true, true, end);
-    if (
-      this.inModule &&
-      !this.options.allowUndeclaredExports &&
-      this.scope.undefinedExports.size > 0
-    ) {
-      for (const [localName, at] of Array.from(this.scope.undefinedExports)) {
-        this.raise(Errors.ModuleExportUndefined, { at, localName });
-      }
-    }
+    this.parseScriptOrModuleBody(program, end);
     return this.finishNode<N.Program>(program, "Program");
   }
 
@@ -1021,13 +1012,7 @@ export default class StatementParser extends ExpressionParser {
     if (createNewLexicalScope) {
       this.scope.enter(SCOPE_OTHER);
     }
-    this.parseBlockBody(
-      node,
-      allowDirectives,
-      false,
-      tt.braceR,
-      afterBlockParse,
-    );
+    this.parseBlockBody(node, allowDirectives, tt.braceR, afterBlockParse);
     if (createNewLexicalScope) {
       this.scope.exit();
     }
@@ -1042,10 +1027,35 @@ export default class StatementParser extends ExpressionParser {
     );
   }
 
+  parseScriptOrModuleBody(node: N.BlockStatementLike, end: TokenType): void {
+    const body = (node.body = []);
+    const directives = (node.directives = []);
+
+    this.parseBlockOrModuleBlockBody(
+      body,
+      directives,
+      true /* topLevel */,
+      end,
+    );
+
+    // It would be nice to just handle this in scope.exit(), but we never exit the
+    // program scope.
+    if (
+      this.inModule &&
+      !this.options.allowUndeclaredExports &&
+      this.scope.currentScope().exports.undefinedLocalNames.size > 0
+    ) {
+      for (const [localName, at] of Array.from(
+        this.scope.currentScope().exports.undefinedLocalNames,
+      )) {
+        this.raise(Errors.ModuleExportUndefined, { at, localName });
+      }
+    }
+  }
+
   parseBlockBody(
     node: N.BlockStatementLike,
     allowDirectives: ?boolean,
-    topLevel: boolean,
     end: TokenType,
     afterBlockParse?: (hasStrictModeDirective: boolean) => void,
   ): void {
@@ -1054,7 +1064,7 @@ export default class StatementParser extends ExpressionParser {
     this.parseBlockOrModuleBlockBody(
       body,
       allowDirectives ? directives : undefined,
-      topLevel,
+      false,
       end,
       afterBlockParse,
     );
@@ -2221,7 +2231,7 @@ export default class StatementParser extends ExpressionParser {
       // Check for duplicate exports
       if (isDefault) {
         // Default exports
-        this.checkDuplicateExports(node, "default");
+        this.scope.checkDuplicateExports(node, "default");
         if (this.hasPlugin("exportDefaultFrom")) {
           const declaration = ((node: any): N.ExportDefaultDeclaration)
             .declaration;
@@ -2242,7 +2252,7 @@ export default class StatementParser extends ExpressionParser {
           const { exported } = specifier;
           const exportName =
             exported.type === "Identifier" ? exported.name : exported.value;
-          this.checkDuplicateExports(specifier, exportName);
+          this.scope.checkDuplicateExports(specifier, exportName);
           // $FlowIgnore
           if (!isFrom && specifier.local) {
             const { local } = specifier;
@@ -2269,7 +2279,7 @@ export default class StatementParser extends ExpressionParser {
           const id = node.declaration.id;
           if (!id) throw new Error("Assertion failure");
 
-          this.checkDuplicateExports(node, id.name);
+          this.scope.checkDuplicateExports(node, id.name);
         } else if (node.declaration.type === "VariableDeclaration") {
           for (const declaration of node.declaration.declarations) {
             this.checkDeclaration(declaration.id);
@@ -2289,7 +2299,7 @@ export default class StatementParser extends ExpressionParser {
 
   checkDeclaration(node: N.Pattern | N.ObjectProperty): void {
     if (node.type === "Identifier") {
-      this.checkDuplicateExports(node, node.name);
+      this.scope.checkDuplicateExports(node, node.name);
     } else if (node.type === "ObjectPattern") {
       for (const prop of node.properties) {
         this.checkDeclaration(prop);
@@ -2307,25 +2317,6 @@ export default class StatementParser extends ExpressionParser {
     } else if (node.type === "AssignmentPattern") {
       this.checkDeclaration(node.left);
     }
-  }
-
-  checkDuplicateExports(
-    node:
-      | N.Identifier
-      | N.StringLiteral
-      | N.ExportNamedDeclaration
-      | N.ExportSpecifier
-      | N.ExportDefaultSpecifier,
-    exportName: string,
-  ): void {
-    if (this.exportedIdentifiers.has(exportName)) {
-      if (exportName === "default") {
-        this.raise(Errors.DuplicateDefaultExport, { at: node });
-      } else {
-        this.raise(Errors.DuplicateExport, { at: node, exportName });
-      }
-    }
-    this.exportedIdentifiers.add(exportName);
   }
 
   // Parses a comma-separated list of module exports.

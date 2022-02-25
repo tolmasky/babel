@@ -57,6 +57,7 @@ export default [
   "TS1184", // Modifiers cannot appear here.
   "TS1185", // Merge conflict marker encountered.
   "TS1191", // An import declaration cannot have modifiers.
+  "TS1194", // Export declarations are not permitted in a namespace.
   "TS1196", // Catch clause variable type annotation must be 'any' or 'unknown' if specified.
   "TS1197", // Catch clause variable cannot have an initializer.
   "TS1200", // Line terminator not permitted before arrow.

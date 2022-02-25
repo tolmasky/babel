@@ -7,12 +7,15 @@ import {
   type ScopeFlags,
   type BindingTypes,
 } from "../../util/scopeflags";
-import * as N from "../../types";
 
 // Reference implementation: https://github.com/facebook/flow/blob/23aeb2a2ef6eb4241ce178fde5d8f17c5f747fb5/src/typing/env.ml#L536-L584
 class FlowScope extends Scope {
   // declare function foo(): type;
   declareFunctions: Set<string> = new Set();
+
+  has(name: string) {
+    return this.declareFunctions.has(name) || super.has(name);
+  }
 }
 
 export default class FlowScopeHandler extends ScopeHandler<FlowScope> {
@@ -47,11 +50,5 @@ export default class FlowScopeHandler extends ScopeHandler<FlowScope> {
     }
 
     return false;
-  }
-
-  checkLocalExport(id: N.Identifier) {
-    if (!this.scopeStack[0].declareFunctions.has(id.name)) {
-      super.checkLocalExport(id);
-    }
   }
 }

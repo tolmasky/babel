@@ -31,6 +31,14 @@ class TypeScriptScope extends Scope {
   // We need to track them anyway, to avoid "X is not defined" errors
   // when exporting them.
   exportOnlyBindings: Set<string> = new Set();
+
+  has(name: string) {
+    return (
+      this.types.has(name) ||
+      this.exportOnlyBindings.has(name) ||
+      super.has(name)
+    );
+  }
 }
 
 // See https://github.com/babel/babel/pull/9766#discussion_r268920730 for an

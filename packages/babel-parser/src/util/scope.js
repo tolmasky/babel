@@ -6,6 +6,7 @@ import {
   SCOPE_SIMPLE_CATCH,
   SCOPE_SUPER,
   SCOPE_PROGRAM,
+  SCOPE_TS_MODULE,
   SCOPE_VAR,
   SCOPE_CLASS,
   SCOPE_STATIC_BLOCK,
@@ -21,6 +22,14 @@ import * as N from "../types";
 import { Errors } from "../parse-error";
 import Tokenizer from "../tokenizer";
 
+class Exports {
+  undefinedLocalNames: Map<string, Position> = new Map();
+
+  // Names of exports store. `default` is stored as a name for both
+  // `export default foo;` and `export { foo as default };`.
+  encounteredExportNames: Set<string> = new Set();
+}
+
 // Start an AST node, attaching a start offset.
 export class Scope {
   declare flags: ScopeFlags;
@@ -31,18 +40,38 @@ export class Scope {
   // A set of lexically-declared FunctionDeclaration names in the current lexical scope
   functions: Set<string> = new Set();
 
+  exports: Exports | null;
+
   constructor(flags: ScopeFlags) {
     this.flags = flags;
+
+    if (isExportCompatibleScope(this)) {
+      this.exports = new Exports();
+    }
+  }
+
+  has(name: string) {
+    return (
+      this.lexical.has(name) ||
+      this.var.has(name) ||
+      // In strict mode, scope.functions will always be empty.
+      // Modules are strict by default, but the `scriptMode` option
+      // can overwrite this behavior.
+      !this.functions.has(name)
+    );
   }
 }
+
+const isExportCompatibleScope = ({ flags }) =>
+  flags & (SCOPE_PROGRAM | SCOPE_TS_MODULE);
 
 // The functions in this module keep track of declared variables in the
 // current scope in order to detect duplicate variable names.
 export default class ScopeHandler<IScope: Scope = Scope> {
   parser: Tokenizer;
   scopeStack: Array<IScope> = [];
+  exportCompatibleScopeStack: Array<IScope> = [];
   inModule: boolean;
-  undefinedExports: Map<string, Position> = new Map();
 
   constructor(parser: Tokenizer, inModule: boolean) {
     this.parser = parser;
@@ -91,11 +120,18 @@ export default class ScopeHandler<IScope: Scope = Scope> {
   /*:: +createScope: (flags: ScopeFlags) => IScope; */
 
   enter(flags: ScopeFlags) {
-    this.scopeStack.push(this.createScope(flags));
+    const scope = this.createScope(flags);
+
+    this.scopeStack.push(scope);
+    if (isExportCompatibleScope(scope)) {
+      this.exportCompatibleScopeStack.unshift(scope);
+    }
   }
 
   exit() {
-    this.scopeStack.pop();
+    if (isExportCompatibleScope(this.scopeStack.pop())) {
+      this.exportCompatibleScopeStack.shift();
+    }
   }
 
   // The spec says:
@@ -132,14 +168,14 @@ export default class ScopeHandler<IScope: Scope = Scope> {
         if (scope.flags & SCOPE_VAR) break;
       }
     }
-    if (this.parser.inModule && scope.flags & SCOPE_PROGRAM) {
-      this.undefinedExports.delete(name);
+    if (this.parser.inModule && isExportCompatibleScope(scope)) {
+      scope.exports.undefinedLocalNames.delete(name);
     }
   }
 
   maybeExportDefined(scope: IScope, name: string) {
-    if (this.parser.inModule && scope.flags & SCOPE_PROGRAM) {
-      this.undefinedExports.delete(name);
+    if (this.parser.inModule && isExportCompatibleScope(scope.flags)) {
+      scope.exports.undefinedLocalNames.delete(name);
     }
   }
 
@@ -186,18 +222,32 @@ export default class ScopeHandler<IScope: Scope = Scope> {
     );
   }
 
-  checkLocalExport(id: N.Identifier) {
-    const { name } = id;
-    const topLevelScope = this.scopeStack[0];
-    if (
-      !topLevelScope.lexical.has(name) &&
-      !topLevelScope.var.has(name) &&
-      // In strict mode, scope.functions will always be empty.
-      // Modules are strict by default, but the `scriptMode` option
-      // can overwrite this behavior.
-      !topLevelScope.functions.has(name)
-    ) {
-      this.undefinedExports.set(name, id.loc.start);
+  checkLocalExport({ name, loc }: N.Identifier) {
+    const exportCompatibleScope = this.exportCompatibleScopeStack[0];
+
+    if (!exportCompatibleScope.has(name)) {
+      exportCompatibleScope.exports.undefinedLocalNames.set(name, loc.start);
+    }
+  }
+
+  checkDuplicateExports(
+    node:
+      | N.Identifier
+      | N.StringLiteral
+      | N.ExportNamedDeclaration
+      | N.ExportSpecifier
+      | N.ExportDefaultSpecifier,
+    exportName: string,
+  ): void {
+    const exportNames =
+      this.exportCompatibleScopeStack[0].exports.encounteredExportNames;
+
+    if (!exportNames.has(exportName)) return exportNames.add(exportName);
+
+    if (exportName === "default") {
+      this.parser.raise(Errors.DuplicateDefaultExport, { at: node });
+    } else {
+      this.parser.raise(Errors.DuplicateExport, { at: node, exportName });
     }
   }
 

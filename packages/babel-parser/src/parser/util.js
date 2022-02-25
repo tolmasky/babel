@@ -324,9 +324,6 @@ export default class UtilParser extends Tokenizer {
     const oldLabels = this.state.labels;
     this.state.labels = [];
 
-    const oldExportedIdentifiers = this.exportedIdentifiers;
-    this.exportedIdentifiers = new Set();
-
     // initialize scopes
     const oldInModule = this.inModule;
     this.inModule = inModule;
@@ -347,7 +344,6 @@ export default class UtilParser extends Tokenizer {
     return () => {
       // Revert state
       this.state.labels = oldLabels;
-      this.exportedIdentifiers = oldExportedIdentifiers;
 
       // Revert scopes
       this.inModule = oldInModule;

@@ -20,7 +20,6 @@ import type Parser from "../../parser";
 import {
   type BindingTypes,
   SCOPE_TS_MODULE,
-  SCOPE_OTHER,
   BIND_TS_ENUM,
   BIND_TS_CONST_ENUM,
   BIND_TS_TYPE,
@@ -284,13 +283,6 @@ export default (superClass: Class<Parser>): Class<Parser> =>
     getScopeHandler(): Class<TypeScriptScopeHandler> {
       return TypeScriptScopeHandler;
     }
-
-    // import and export are always allowed in TypeScript, regardless of whether
-    // you are parsing as "script" or "module". However, this is different than
-    // `allowImportExportEverywhere`, as it is only allowed in the same places
-    // that it would be allowed in a module context, not *anywhere*.
-    // eslint-disable-next-line no-unused-vars
-    assertModuleNodeAllowed(node: N.Node): void {}
 
     tsIsIdentifier(): boolean {
       // TODO: actually a bit more complex in TypeScript, but shouldn't matter.
@@ -1740,17 +1732,17 @@ export default (superClass: Class<Parser>): Class<Parser> =>
 
     tsParseModuleBlock(): N.TsModuleBlock {
       const node: N.TsModuleBlock = this.startNode();
-      this.scope.enter(SCOPE_OTHER);
+
+      this.scope.enter(SCOPE_TS_MODULE);
+      this.prodParam.enter(PARAM);
 
       this.expect(tt.braceL);
       // Inside of a module block is considered "top-level", meaning it can have imports and exports.
-      this.parseBlockOrModuleBlockBody(
-        (node.body = []),
-        /* directives */ undefined,
-        /* topLevel */ true,
-        /* end */ tt.braceR,
-      );
+      this.parseScriptOrModuleBody(node, tt.braceR);
+
+      this.prodParam.exit();
       this.scope.exit();
+
       return this.finishNode(node, "TSModuleBlock");
     }
 
@@ -1769,11 +1761,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
         this.tsParseModuleOrNamespaceDeclaration(inner, true);
         node.body = inner;
       } else {
-        this.scope.enter(SCOPE_TS_MODULE);
-        this.prodParam.enter(PARAM);
         node.body = this.tsParseModuleBlock();
-        this.prodParam.exit();
-        this.scope.exit();
       }
       return this.finishNode(node, "TSModuleDeclaration");
     }
@@ -1790,11 +1778,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
         this.unexpected();
       }
       if (this.match(tt.braceL)) {
-        this.scope.enter(SCOPE_TS_MODULE);
-        this.prodParam.enter(PARAM);
         node.body = this.tsParseModuleBlock();
-        this.prodParam.exit();
-        this.scope.exit();
       } else {
         this.semicolon();
       }
@@ -1976,14 +1960,11 @@ export default (superClass: Class<Parser>): Class<Parser> =>
           // `global { }` (with no `declare`) may appear inside an ambient module declaration.
           // Would like to use tsParseAmbientExternalModuleDeclaration here, but already ran past "global".
           if (this.match(tt.braceL)) {
-            this.scope.enter(SCOPE_TS_MODULE);
-            this.prodParam.enter(PARAM);
             const mod: N.TsModuleDeclaration = node;
             mod.global = true;
             mod.id = expr;
             mod.body = this.tsParseModuleBlock();
-            this.scope.exit();
-            this.prodParam.exit();
+
             return this.finishNode(mod, "TSModuleDeclaration");
           }
           break;
@@ -2438,17 +2419,6 @@ export default (superClass: Class<Parser>): Class<Parser> =>
         super.checkReservedWord(word, startLoc, checkKeywords, isBinding);
       }
     }
-
-    /*
-    Don't bother doing this check in TypeScript code because:
-    1. We may have a nested export statement with the same name:
-      export const x = 0;
-      export namespace N {
-        export const x = 1;
-      }
-    2. We have a type checker to warn us about this sort of thing.
-    */
-    checkDuplicateExports() {}
 
     parseImport(node: N.Node): N.AnyImport {
       node.importKind = "value";
