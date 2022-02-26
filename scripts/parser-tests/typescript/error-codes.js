@@ -77,12 +77,13 @@ export default [
   "TS1386", // Constructor type notation must be parenthesized when used in a union type.
   "TS1437", // Namespace must be given a name.
   // "TS2300", // Duplicate identifier '{0}'.
+  "TS2323", // Cannot redeclare exported variable 'default'.
   "TS2337", // Super calls are not permitted outside constructors or in nested functions inside constructors.
   // "TS2340", // Only public and protected methods of the base class are accessible via the 'super' keyword.
   "TS2364", // The left-hand side of an assignment expression must be a variable or a property access.
   // "TS2369", // A parameter property is only allowed in a constructor implementation.
   // "TS2371", // A parameter initializer is only allowed in a function or constructor implementation.
-  //"TS2393", // Duplicate function implementation.
+  // "TS2393", // Duplicate function implementation.
   // "TS2395", // Individual declarations in merged declaration 'f' must be all exported or all local.
   "TS2396", // Duplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.
   // "TS2440", // Import declaration conflicts with local declaration of '{0}'.
@@ -91,6 +92,7 @@ export default [
   "TS2566", // A rest element cannot have a property name.
   //"TS2580",
   "TS2481", // Cannot initialize outer scoped variable '{0}' in the same scope as block scoped declaration '{0}'.
+  "TS2528", // A module cannot have multiple default exports.
   // "TS2567", // Enum declarations can only merge with namespace or other enum declarations.
   "TS2659", // 'super' is only allowed in members of object literal expressions when option 'target' is 'ES2015' or higher.
   "TS2660", // 'super' can only be referenced in members of derived classes or object literal expressions.

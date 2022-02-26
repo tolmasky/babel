@@ -39,9 +39,10 @@ interface II3 {}
 type AA2 = {};
 enum BB2 {}
 function foo() {}
-export { II3 as default, AA2 as A, BB2 as BB3, foo }; // only BB2->BB3 and foo
+export { AA2 as A, BB2 as BB3, foo }; // only BB2->BB3 and foo
 
 // export an interface before declaration
+export default Bar;
 export { Bar } // everything removed
 export { Bar as Bar2, C2 as C4 } // only C2->C4
 interface Bar {}

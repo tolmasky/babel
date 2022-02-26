@@ -1,11 +1,16 @@
 {
   "type": "File",
   "start":0,"end":313,"loc":{"start":{"line":1,"column":0,"index":0},"end":{"line":8,"column":58,"index":313}},
+  "errors": [
+    "SyntaxError: Only one default export allowed per module. (6:0)",
+    "SyntaxError: Only one default export allowed per module. (8:0)"
+  ],
   "program": {
     "type": "Program",
     "start":0,"end":313,"loc":{"start":{"line":1,"column":0,"index":0},"end":{"line":8,"column":58,"index":313}},
     "sourceType": "module",
     "interpreter": null,
+    "directives": [],
     "body": [
       {
         "type": "ClassDeclaration",
@@ -176,8 +181,7 @@
           }
         ]
       }
-    ],
-    "directives": []
+    ]
   },
   "comments": [
     {

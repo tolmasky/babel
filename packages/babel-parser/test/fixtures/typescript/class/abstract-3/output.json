@@ -1,0 +1,74 @@
+{
+  "type": "File",
+  "start":0,"end":109,"loc":{"start":{"line":1,"column":0,"index":0},"end":{"line":2,"column":58,"index":109}},
+  "program": {
+    "type": "Program",
+    "start":0,"end":109,"loc":{"start":{"line":1,"column":0,"index":0},"end":{"line":2,"column":58,"index":109}},
+    "sourceType": "module",
+    "interpreter": null,
+    "directives": [],
+    "body": [
+      {
+        "type": "ExportDefaultDeclaration",
+        "start":51,"end":109,"loc":{"start":{"line":2,"column":0,"index":51},"end":{"line":2,"column":58,"index":109}},
+        "exportKind": "value",
+        "declaration": {
+          "type": "ClassDeclaration",
+          "start":66,"end":109,"loc":{"start":{"line":2,"column":15,"index":66},"end":{"line":2,"column":58,"index":109}},
+          "abstract": true,
+          "id": {
+            "type": "Identifier",
+            "start":81,"end":83,"loc":{"start":{"line":2,"column":30,"index":81},"end":{"line":2,"column":32,"index":83},"identifierName":"C5"},
+            "name": "C5"
+          },
+          "superClass": null,
+          "body": {
+            "type": "ClassBody",
+            "start":84,"end":109,"loc":{"start":{"line":2,"column":33,"index":84},"end":{"line":2,"column":58,"index":109}},
+            "body": [
+              {
+                "type": "TSDeclareMethod",
+                "start":86,"end":107,"loc":{"start":{"line":2,"column":35,"index":86},"end":{"line":2,"column":56,"index":107}},
+                "abstract": true,
+                "static": false,
+                "key": {
+                  "type": "Identifier",
+                  "start":95,"end":98,"loc":{"start":{"line":2,"column":44,"index":95},"end":{"line":2,"column":47,"index":98},"identifierName":"foo"},
+                  "name": "foo"
+                },
+                "computed": false,
+                "kind": "method",
+                "id": null,
+                "generator": false,
+                "async": false,
+                "params": [],
+                "returnType": {
+                  "type": "TSTypeAnnotation",
+                  "start":100,"end":106,"loc":{"start":{"line":2,"column":49,"index":100},"end":{"line":2,"column":55,"index":106}},
+                  "typeAnnotation": {
+                    "type": "TSVoidKeyword",
+                    "start":102,"end":106,"loc":{"start":{"line":2,"column":51,"index":102},"end":{"line":2,"column":55,"index":106}}
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "leadingComments": [
+          {
+            "type": "CommentLine",
+            "value": " `abstract class` is not valid as an expression.",
+            "start":0,"end":50,"loc":{"start":{"line":1,"column":0,"index":0},"end":{"line":1,"column":50,"index":50}}
+          }
+        ]
+      }
+    ]
+  },
+  "comments": [
+    {
+      "type": "CommentLine",
+      "value": " `abstract class` is not valid as an expression.",
+      "start":0,"end":50,"loc":{"start":{"line":1,"column":0,"index":0},"end":{"line":1,"column":50,"index":50}}
+    }
+  ]
+}
