@@ -2872,7 +2872,9 @@ export default (superClass: Class<Parser>): Class<Parser> =>
       isDefault?: boolean,
       isFrom?: boolean,
     ): void {
-      super.checkExport(node, checkNames, isDefault, isFrom);
+      if (node.declaration?.type !== "TSDeclareFunction") {
+        super.checkExport(node, checkNames, isDefault, isFrom);
+      }
 
       if (!(this.scope.currentScope().flags & SCOPE_TS_MODULE)) return;
 
