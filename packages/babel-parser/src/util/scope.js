@@ -27,8 +27,10 @@ class Exports {
 
   // Names of exports store. `default` is stored as a name for both
   // `export default foo;` and `export { foo as default };`.
-  encounteredExportNames: Set<string> = new Set();
+  existingExportNames: Set<string> = new Set();
 }
+
+type ExportCompatibleScope = { exports: Exports, has: string => boolean };
 
 // Start an AST node, attaching a start offset.
 export class Scope {
@@ -40,7 +42,7 @@ export class Scope {
   // A set of lexically-declared FunctionDeclaration names in the current lexical scope
   functions: Set<string> = new Set();
 
-  exports: Exports | null;
+  exports: Exports | null = null;
 
   constructor(flags: ScopeFlags) {
     this.flags = flags;
@@ -70,7 +72,7 @@ const isExportCompatibleScope = ({ flags }) =>
 export default class ScopeHandler<IScope: Scope = Scope> {
   parser: Tokenizer;
   scopeStack: Array<IScope> = [];
-  exportCompatibleScopeStack: Array<IScope> = [];
+  exportCompatibleScopeStack: Array<ExportCompatibleScope> = [];
   inModule: boolean;
 
   constructor(parser: Tokenizer, inModule: boolean) {
@@ -124,6 +126,7 @@ export default class ScopeHandler<IScope: Scope = Scope> {
 
     this.scopeStack.push(scope);
     if (isExportCompatibleScope(scope)) {
+      // $FlowIgnore
       this.exportCompatibleScopeStack.unshift(scope);
     }
   }
@@ -173,6 +176,7 @@ export default class ScopeHandler<IScope: Scope = Scope> {
 
   maybeExportDefined(scope: IScope, name: string) {
     if (this.parser.inModule && isExportCompatibleScope(scope)) {
+      // $FlowIgnore
       scope.exports.undefinedLocalNames.delete(name);
     }
   }
@@ -238,11 +242,11 @@ export default class ScopeHandler<IScope: Scope = Scope> {
     exportName: string,
   ): void {
     const exportNames =
-      this.exportCompatibleScopeStack[0].exports.encounteredExportNames;
+      this.exportCompatibleScopeStack[0].exports.existingExportNames;
 
-    if (!exportNames.has(exportName)) return exportNames.add(exportName);
-
-    if (exportName === "default") {
+    if (!exportNames.has(exportName)) {
+      exportNames.add(exportName);
+    } else if (exportName === "default") {
       this.parser.raise(Errors.DuplicateDefaultExport, { at: node });
     } else {
       this.parser.raise(Errors.DuplicateExport, { at: node, exportName });

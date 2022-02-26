@@ -153,7 +153,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
 
     parseBlockBody(
       node: N.BlockStatementLike,
-      ...args: [?boolean, boolean, TokenType, void | (boolean => void)]
+      ...args: [?boolean, TokenType, void | (boolean => void)]
     ): void {
       super.parseBlockBody(node, ...args);
       this.removeDirectives(node);

@@ -1030,7 +1030,8 @@ export default class StatementParser extends ExpressionParser {
 
   parseScriptOrModuleBody(node: N.BlockStatementLike, end: TokenType): void {
     this.parseBlockOrModuleBlockBody(
-      node.body = [],
+      (node.body = []),
+      // $FlowIgnore
       node.directives,
       true /* topLevel */,
       end,

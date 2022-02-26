@@ -82,9 +82,6 @@ const TSErrors = toParseErrorClasses`typescript`(_ => ({
   AccesorCannotHaveTypeParameters: _(
     "An accessor cannot have type parameters.",
   ),
-  ADefaultExportCanOnlyBeUsedInAnECMAScriptStyleModule: _(
-    "A default export can only be used in an ECMAScript-style module",
-  ),
   CannotFindName: _<{| name: string |}>(
     ({ name }) => `Cannot find name '${name}'.`,
   ),
@@ -106,6 +103,9 @@ const TSErrors = toParseErrorClasses`typescript`(_ => ({
   ),
   DeclareFunctionHasImplementation: _(
     "An implementation cannot be declared in ambient contexts.",
+  ),
+  DefaultExportCanOnlyBeUsedInAnECMAScriptStyleModule: _(
+    "A default export can only be used in an ECMAScript-style module",
   ),
   DuplicateAccessibilityModifier: _<{| modifier: N.Accessibility |}>(
     // `Accessibility modifier already seen: ${modifier}` would be more helpful.
@@ -1743,7 +1743,10 @@ export default (superClass: Class<Parser>): Class<Parser> =>
       this.prodParam.enter(PARAM);
 
       this.expect(tt.braceL);
-      // Inside of a module block is considered "top-level", meaning it can have imports and exports.
+
+      // Inside of a module block is considered "top-level", meaning it can have
+      // imports and exports.
+      // $FlowIgnore
       this.parseScriptOrModuleBody(node, tt.braceR);
 
       this.prodParam.exit();
@@ -2863,8 +2866,13 @@ export default (superClass: Class<Parser>): Class<Parser> =>
       return declaration;
     }
 
-    checkExport(node) {
-      super.checkExport(node);
+    checkExport(
+      node: N.ExportNamedDeclaration,
+      checkNames?: boolean,
+      isDefault?: boolean,
+      isFrom?: boolean,
+    ): void {
+      super.checkExport(node, checkNames, isDefault, isFrom);
 
       if (!(this.scope.currentScope().flags & SCOPE_TS_MODULE)) return;
 
@@ -2881,7 +2889,7 @@ export default (superClass: Class<Parser>): Class<Parser> =>
         this.raise(
           hasNamedExport
             ? TSErrors.ExportDeclarationsAreNotPermittedInANamespace
-            : TSErrors.ADefaultExportCanOnlyBeUsedInAnECMAScriptStyleModule,
+            : TSErrors.DefaultExportCanOnlyBeUsedInAnECMAScriptStyleModule,
           {
             at: node,
           },

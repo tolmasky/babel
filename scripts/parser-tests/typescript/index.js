@@ -63,7 +63,6 @@ function baselineContainsParserErrorCodes(testName) {
 
 const IgnoreRegExp = /@noTypesAndSymbols|ts-ignore|\n#!/;
 const AlwaysStrictRegExp = /(^|\n)\/\/\s*@alwaysStrict:\s*true/;
-const ScriptTarget = /(^|\n)\/\/\s*@target:\s*es(3|5)/;
 
 const runner = new TestRunner({
   testDir: path.join(TSTestsPath, "./cases/compiler"),
