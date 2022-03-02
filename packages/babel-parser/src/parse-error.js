@@ -9,16 +9,9 @@ import {
 } from "./parse-error/credentials";
 
 const ArrayIsArray = Array.isArray;
-const {
-  assign: ObjectAssign,
-  defineProperty: ObjectDefineProperty,
-  getPrototypeOf: ObjectGetPrototypeOf,
-  keys: ObjectKeys,
-} = Object;
+const { defineProperty: ObjectDefineProperty, keys: ObjectKeys } = Object;
 
 type ToMessage<ErrorDetails> = (self: ErrorDetails) => string;
-
-const StandardMessage = Symbol("StandardMessage");
 
 // This should really be an abstract class, but that concept doesn't exist in
 // Flow, outside of just creating an interface, but then you can't specify that
@@ -32,9 +25,10 @@ const StandardMessage = Symbol("StandardMessage");
 // to keep things simple and prepare for a Typescript future, we just make it a
 // "private" superclass that we exclusively subclass:
 
-export class ParseError<ErrorDetails> extends SyntaxError {
+export class ParseError<+ReasonCode: string, ErrorDetails> extends SyntaxError {
   code: ParseErrorCode;
-  reasonCode: string;
+  +reasonCode: ReasonCode;
+  #toMessage: ToMessage<ErrorDetails>;
 
   loc: Position;
   details: ErrorDetails;
@@ -45,14 +39,23 @@ export class ParseError<ErrorDetails> extends SyntaxError {
   // missingPlugin?: string[]
 
   constructor({
+    reasonCode,
+    code,
+    toMessage,
     loc,
     details,
   }: {
+    reasonCode: ReasonCode,
+    code: ParseErrorCode,
+    toMessage: ToMessage<ErrorDetails>,
     loc: Position,
     details: ErrorDetails,
-  }): ParseError<ErrorDetails> {
+  }): ParseError<ReasonCode, ErrorDetails> {
     super();
 
+    this.reasonCode = reasonCode;
+    this.code = code;
+    this.#toMessage = toMessage;
     this.loc = loc;
 
     ObjectDefineProperty(this, "details", {
@@ -79,8 +82,11 @@ export class ParseError<ErrorDetails> extends SyntaxError {
   }: {
     loc?: Position,
     details?: ErrorDetails,
-  } = {}) {
-    return new (ObjectGetPrototypeOf(this).constructor)({
+  } = {}): ParseError<ReasonCode, ErrorDetails> {
+    return new ParseError({
+      reasonCode: this.reasonCode,
+      code: this.code,
+      toMessage: this.#toMessage,
       loc: loc || this.loc,
       details: { ...this.details, ...details },
     });
@@ -89,31 +95,40 @@ export class ParseError<ErrorDetails> extends SyntaxError {
   get pos() {
     return this.loc.index;
   }
+
+  get message() {
+    // $FlowIgnore - Flow thinks #toMessage does not exist
+    const message = this.#toMessage(this.details);
+    return `${message} (${this.loc.line}:${this.loc.column})`;
+  }
+
+  set message(value: string) {
+    ObjectDefineProperty(this, "message", {
+      value,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
+  }
 }
 
-function toParseErrorClass<ErrorDetails>(
+export type ErrorDescription<+ReasonCode, ErrorDetails> = {
+  +reasonCode: ReasonCode,
+  toMessage: ToMessage<ErrorDetails>,
+  code: ParseErrorCode,
+  syntaxPlugin?: $PropertyType<ParseErrorCredentials, "syntaxPlugin">,
+};
+
+function toParseErrorInfo<ReasonCode, ErrorDetails>(
+  reasonCode: ReasonCode,
   toMessage: ToMessage<ErrorDetails>,
   credentials: ParseErrorCredentials,
-): Class<ParseError<ErrorDetails>> {
-  return class extends ParseError<ErrorDetails> {
-    #message: typeof StandardMessage | string = StandardMessage;
-
-    constructor(...args): ParseError<ErrorDetails> {
-      super(...args);
-      // $FlowIgnore - Only necessary because we can't make syntaxPlugin optional.
-      ObjectAssign(this, credentials);
-      return this;
-    }
-
-    get message() {
-      return this.#message !== StandardMessage
-        ? String(this.#message)
-        : `${toMessage(this.details)} (${this.loc.line}:${this.loc.column})`;
-    }
-
-    set message(message) {
-      this.#message = message;
-    }
+): ErrorDescription<ReasonCode, ErrorDetails> {
+  return {
+    reasonCode,
+    toMessage,
+    code: credentials.code,
+    syntaxPlugin: credentials.syntaxPlugin,
   };
 }
 
@@ -125,19 +140,19 @@ function toParseErrorClass<ErrorDetails>(
 // `Class<ParseError<ErrorDetails>>`, but we simply mark it as such to "carry"
 // the `ErrorDetails` type parameter around. This is not a problem in Typescript
 // where this intermediate function actually won't be needed at all.
-declare function toParseErrorCredentials<T: string>(
-  T,
-  ?{ code?: ParseErrorCode, reasonCode?: string } | boolean,
-): Class<ParseError<{||}>>;
+declare function toParseErrorCredentials<ReasonCode: string>(
+  string,
+  ?{ code?: ParseErrorCode, reasonCode?: ReasonCode } | boolean,
+): ErrorDescription<ReasonCode, {||}>;
 
 // ESLint seems to erroneously think that Flow's overloading syntax is an
 // accidental redeclaration of the function:
 // https://github.com/babel/eslint-plugin-babel/issues/162
 // eslint-disable-next-line no-redeclare
-declare function toParseErrorCredentials<T>(
+declare function toParseErrorCredentials<ReasonCode: string, T>(
   (T) => string,
-  ?{ code?: ParseErrorCode, reasonCode?: string } | boolean,
-): Class<ParseError<T>>;
+  ?{ code?: ParseErrorCode, reasonCode?: ReasonCode } | boolean,
+): ErrorDescription<ReasonCode, T>;
 
 // See comment about eslint and Flow overloading above.
 // eslint-disable-next-line no-redeclare
@@ -178,20 +193,17 @@ export function toParseErrorClasses(argument, syntaxPlugin) {
 
   for (const reasonCode of ObjectKeys(classes)) {
     const [toMessage, credentials = {}] = classes[reasonCode];
-    const ParseErrorClass = toParseErrorClass(toMessage, {
-      code: credentials.code || ParseErrorCodes.SyntaxError,
-      reasonCode: credentials.reasonCode || reasonCode,
-      ...(syntaxPlugin ? { syntaxPlugin } : {}),
-    });
+    const ParseErrorClass = toParseErrorInfo(
+      credentials.reasonCode || reasonCode,
+      toMessage,
+      {
+        reasonCode: credentials.reasonCode || reasonCode,
+        code: credentials.code || ParseErrorCodes.SyntaxError,
+        ...(syntaxPlugin ? { syntaxPlugin } : {}),
+      },
+    );
 
     classes[reasonCode] = ParseErrorClass;
-
-    // We do this for backwards compatibility so that all errors just have the
-    // "SyntaxError" name in their messages instead of leaking the private
-    // subclass name.
-    ObjectDefineProperty(ParseErrorClass.prototype.constructor, "name", {
-      value: "SyntaxError",
-    });
   }
 
   return classes;

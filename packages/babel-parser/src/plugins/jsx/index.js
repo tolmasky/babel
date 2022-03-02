@@ -24,29 +24,37 @@ const DECIMAL_NUMBER = /^\d+$/;
 
 /* eslint sort-keys: "error" */
 const JsxErrors = toParseErrorClasses`jsx`(_ => ({
-  AttributeIsEmpty: _(
+  AttributeIsEmpty: _<"AttributeIsEmpty">(
     "JSX attributes must only be assigned a non-empty expression.",
   ),
-  MissingClosingTagElement: _<{| openingTagName: string |}>(
+  MissingClosingTagElement: _<
+    "MissingClosingTagElement",
+    {| openingTagName: string |},
+  >(
     ({ openingTagName }) =>
       `Expected corresponding JSX closing tag for <${openingTagName}>.`,
   ),
-  MissingClosingTagFragment: _(
+  MissingClosingTagFragment: _<"MissingClosingTagFragment">(
     "Expected corresponding JSX closing tag for <>.",
   ),
-  UnexpectedSequenceExpression: _(
+  UnexpectedSequenceExpression: _<"UnexpectedSequenceExpression">(
     "Sequence expressions cannot be directly nested inside JSX. Did you mean to wrap it in parentheses (...)?",
   ),
   // FIXME: Unify with Errors.UnexpectedToken
-  UnexpectedToken: _<{| unexpected: string, HTMLEntity: string |}>(
+  UnexpectedToken: _<
+    "UnexpectedToken",
+    {| unexpected: string, HTMLEntity: string |},
+  >(
     ({ unexpected, HTMLEntity }) =>
       `Unexpected token \`${unexpected}\`. Did you mean \`${HTMLEntity}\` or \`{'${unexpected}'}\`?`,
   ),
-  UnsupportedJsxValue: _(
+  UnsupportedJsxValue: _<"UnsupportedJsxValue">(
     "JSX value should be either an expression or a quoted JSX text.",
   ),
-  UnterminatedJsxContent: _("Unterminated JSX contents."),
-  UnwrappedAdjacentJSXElements: _(
+  UnterminatedJsxContent: _<"UnterminatedJsxContent">(
+    "Unterminated JSX contents.",
+  ),
+  UnwrappedAdjacentJSXElements: _<"UnwrappedAdjacentJSXElements">(
     "Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>?",
   ),
 }));

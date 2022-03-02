@@ -76,36 +76,36 @@ class ExpressionScope {
   }
 }
 
-type ArrowHeadParsingParameterInitializerErrorClass =
+type ArrowHeadParsingParameterInitializerErrorDesc =
   | typeof Errors.AwaitExpressionFormalParameter
   | typeof Errors.YieldInParameter;
 
-type ArrowHeadParsingDeclarationErrorClass =
-  | ArrowHeadParsingParameterInitializerErrorClass
+type ArrowHeadParsingDeclarationErrorDesc =
+  | ArrowHeadParsingParameterInitializerErrorDesc
   | typeof Errors.InvalidParenthesizedAssignment
   | typeof Errors.AwaitBindingIdentifier;
 
 class ArrowHeadParsingScope extends ExpressionScope {
   declarationErrors: Map<
     number,
-    [ArrowHeadParsingDeclarationErrorClass, Position],
+    [ArrowHeadParsingDeclarationErrorDesc, Position],
   > = new Map();
   constructor(type: 1 | 2) {
     super(type);
   }
-  recordDeclarationError<T: ArrowHeadParsingDeclarationErrorClass>(
-    ParsingErrorClass: T,
+  recordDeclarationError<T: ArrowHeadParsingDeclarationErrorDesc>(
+    ParsingErrorDesc: T,
     { at }: { at: Position },
   ) {
     const index = at.index;
 
-    this.declarationErrors.set(index, [ParsingErrorClass, at]);
+    this.declarationErrors.set(index, [ParsingErrorDesc, at]);
   }
   clearDeclarationError(index: number) {
     this.declarationErrors.delete(index);
   }
   iterateErrors(
-    iterator: ([ArrowHeadParsingDeclarationErrorClass, Position]) => void,
+    iterator: ([ArrowHeadParsingDeclarationErrorDesc, Position]) => void,
   ) {
     this.declarationErrors.forEach(iterator);
   }
@@ -137,7 +137,7 @@ export default class ExpressionScopeHandler {
    * @memberof ExpressionScopeHandler
    */
   recordParameterInitializerError(
-    ParseErrorClass: ArrowHeadParsingParameterInitializerErrorClass,
+    parseErrorDesc: ArrowHeadParsingParameterInitializerErrorDesc,
     { at: node }: { at: Node },
   ): void {
     const origin = { at: node.loc.start };
@@ -147,7 +147,7 @@ export default class ExpressionScopeHandler {
     while (!scope.isCertainlyParameterDeclaration()) {
       if (scope.canBeArrowParameterDeclaration()) {
         /*:: invariant(scope instanceof ArrowHeadParsingScope) */
-        scope.recordDeclarationError(ParseErrorClass, origin);
+        scope.recordDeclarationError(parseErrorDesc, origin);
       } else {
         /*:: invariant(scope.type == kExpression) */
         // Type-Expression is the boundary where initializer error can populate to
@@ -155,7 +155,7 @@ export default class ExpressionScopeHandler {
       }
       scope = stack[--i];
     }
-    this.parser.raise(ParseErrorClass, origin);
+    this.parser.raise(parseErrorDesc, origin);
   }
 
   /**
@@ -223,8 +223,8 @@ export default class ExpressionScopeHandler {
     const currentScope = stack[stack.length - 1];
     if (!currentScope.canBeArrowParameterDeclaration()) return;
     /*:: invariant(currentScope instanceof ArrowHeadParsingScope) */
-    currentScope.iterateErrors(([ParseErrorClass, loc]) => {
-      this.parser.raise(ParseErrorClass, { at: loc });
+    currentScope.iterateErrors(([parseErrorDesc, loc]) => {
+      this.parser.raise(parseErrorDesc, { at: loc });
       // iterate from parent scope
       let i = stack.length - 2;
       let scope = stack[i];

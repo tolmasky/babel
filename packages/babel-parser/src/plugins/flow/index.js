@@ -54,46 +54,58 @@ const reservedTypes = new Set([
 /* eslint sort-keys: "error" */
 // The Errors key follows https://github.com/facebook/flow/blob/master/src/parser/parse_error.ml unless it does not exist
 const FlowErrors = toParseErrorClasses`flow`(_ => ({
-  AmbiguousConditionalArrow: _(
+  AmbiguousConditionalArrow: _<"AmbiguousConditionalArrow">(
     "Ambiguous expression: wrap the arrow functions in parentheses to disambiguate.",
   ),
-  AmbiguousDeclareModuleKind: _(
+  AmbiguousDeclareModuleKind: _<"AmbiguousDeclareModuleKind">(
     "Found both `declare module.exports` and `declare export` in the same module. Modules can only have 1 since they are either an ES module or they are a CommonJS module.",
   ),
   // TODO: When we get proper string enums in typescript make this ReservedType.
   // Not really worth it to do the whole $Values dance with reservedTypes set.
-  AssignReservedType: _<{| reservedType: string |}>(
+  AssignReservedType: _<"AssignReservedType", {| reservedType: string |}>(
     ({ reservedType }) => `Cannot overwrite reserved type ${reservedType}.`,
   ),
-  DeclareClassElement: _(
+  DeclareClassElement: _<"DeclareClassElement">(
     "The `declare` modifier can only appear on class fields.",
   ),
-  DeclareClassFieldInitializer: _(
+  DeclareClassFieldInitializer: _<"DeclareClassFieldInitializer">(
     "Initializers are not allowed in fields with the `declare` modifier.",
   ),
-  DuplicateDeclareModuleExports: _(
+  DuplicateDeclareModuleExports: _<"DuplicateDeclareModuleExports">(
     "Duplicate `declare module.exports` statement.",
   ),
-  EnumBooleanMemberNotInitialized: _<{|
-    memberName: string,
-    enumName: string,
-  |}>(
+  EnumBooleanMemberNotInitialized: _<
+    "EnumBooleanMemberNotInitialized",
+    {| memberName: string, enumName: string |},
+  >(
     ({ memberName, enumName }) =>
       `Boolean enum members need to be initialized. Use either \`${memberName} = true,\` or \`${memberName} = false,\` in enum \`${enumName}\`.`,
   ),
-  EnumDuplicateMemberName: _<{| memberName: string, enumName: string |}>(
+  EnumDuplicateMemberName: _<
+    "EnumDuplicateMemberName",
+    {| memberName: string, enumName: string |},
+  >(
     ({ memberName, enumName }) =>
       `Enum member names need to be unique, but the name \`${memberName}\` has already been used before in enum \`${enumName}\`.`,
   ),
-  EnumInconsistentMemberValues: _<{| enumName: string |}>(
+  EnumInconsistentMemberValues: _<
+    "EnumInconsistentMemberValues",
+    {| enumName: string |},
+  >(
     ({ enumName }) =>
       `Enum \`${enumName}\` has inconsistent member initializers. Either use no initializers, or consistently use literals (either booleans, numbers, or strings) for all member initializers.`,
   ),
-  EnumInvalidExplicitType: _<{| invalidEnumType: string, enumName: string |}>(
+  EnumInvalidExplicitType: _<
+    "EnumInvalidExplicitType",
+    {| invalidEnumType: string, enumName: string |},
+  >(
     ({ invalidEnumType, enumName }) =>
       `Enum type \`${invalidEnumType}\` is not valid. Use one of \`boolean\`, \`number\`, \`string\`, or \`symbol\` in enum \`${enumName}\`.`,
   ),
-  EnumInvalidExplicitTypeUnknownSupplied: _<{| enumName: string |}>(
+  EnumInvalidExplicitTypeUnknownSupplied: _<
+    "EnumInvalidExplicitTypeUnknownSupplied",
+    {| enumName: string |},
+  >(
     ({ enumName }) =>
       `Supplied enum type is not valid. Use one of \`boolean\`, \`number\`, \`string\`, or \`symbol\` in enum \`${enumName}\`.`,
   ),
@@ -109,134 +121,152 @@ const FlowErrors = toParseErrorClasses`flow`(_ => ({
   // `EnumInvalidMemberInitializer` error that can accept `EnumExplicitType`
   // without alteration, and then just have its message change based on the
   // explicitType.
-  EnumInvalidMemberInitializerPrimaryType: _<{|
-    enumName: string,
-    memberName: string,
-    explicitType: EnumExplicitType,
-  |}>(
+  EnumInvalidMemberInitializerPrimaryType: _<
+    "EnumInvalidMemberInitializerPrimaryType",
+    {| enumName: string, memberName: string, explicitType: EnumExplicitType |},
+  >(
     ({ enumName, memberName, explicitType }) =>
       // $FlowIgnore (coercing null which never actually happens)
       `Enum \`${enumName}\` has type \`${explicitType}\`, so the initializer of \`${memberName}\` needs to be a ${explicitType} literal.`,
   ),
-  EnumInvalidMemberInitializerSymbolType: _<{|
-    enumName: string,
-    memberName: string,
-    explicitType: EnumExplicitType,
-  |}>(
+  EnumInvalidMemberInitializerSymbolType: _<
+    "EnumInvalidMemberInitializerSymbolType",
+    {| enumName: string, memberName: string, explicitType: EnumExplicitType |},
+  >(
     ({ enumName, memberName }) =>
       `Symbol enum members cannot be initialized. Use \`${memberName},\` in enum \`${enumName}\`.`,
   ),
-  EnumInvalidMemberInitializerUnknownType: _<{|
-    enumName: string,
-    memberName: string,
-    explicitType: EnumExplicitType,
-  |}>(
+  EnumInvalidMemberInitializerUnknownType: _<
+    "EnumInvalidMemberInitializerUnknownType",
+    {| enumName: string, memberName: string, explicitType: EnumExplicitType |},
+  >(
     ({ enumName, memberName }) =>
       `The enum member initializer for \`${memberName}\` needs to be a literal (either a boolean, number, or string) in enum \`${enumName}\`.`,
   ),
-  EnumInvalidMemberName: _<{|
-    enumName: string,
-    memberName: string,
-    suggestion: string,
-  |}>(
+  EnumInvalidMemberName: _<
+    "EnumInvalidMemberName",
+    {| enumName: string, memberName: string, suggestion: string |},
+  >(
     ({ enumName, memberName, suggestion }) =>
       `Enum member names cannot start with lowercase 'a' through 'z'. Instead of using \`${memberName}\`, consider using \`${suggestion}\`, in enum \`${enumName}\`.`,
   ),
-  EnumNumberMemberNotInitialized: _<{|
-    enumName: string,
-    memberName: string,
-  |}>(
+  EnumNumberMemberNotInitialized: _<
+    "EnumNumberMemberNotInitialized",
+    {| enumName: string, memberName: string |},
+  >(
     ({ enumName, memberName }) =>
       `Number enum members need to be initialized, e.g. \`${memberName} = 1\` in enum \`${enumName}\`.`,
   ),
-  EnumStringMemberInconsistentlyInitailized: _<{| enumName: string |}>(
+  EnumStringMemberInconsistentlyInitailized: _<
+    "EnumStringMemberInconsistentlyInitailized",
+    {| enumName: string |},
+  >(
     ({ enumName }) =>
       `String enum members need to consistently either all use initializers, or use no initializers, in enum \`${enumName}\`.`,
   ),
-  GetterMayNotHaveThisParam: _("A getter cannot have a `this` parameter."),
-  ImportTypeShorthandOnlyInPureImport: _(
+  GetterMayNotHaveThisParam: _<"GetterMayNotHaveThisParam">(
+    "A getter cannot have a `this` parameter.",
+  ),
+  ImportTypeShorthandOnlyInPureImport: _<"ImportTypeShorthandOnlyInPureImport">(
     "The `type` and `typeof` keywords on named imports can only be used on regular `import` statements. It cannot be used with `import type` or `import typeof` statements.",
   ),
-  InexactInsideExact: _(
+  InexactInsideExact: _<"InexactInsideExact">(
     "Explicit inexact syntax cannot appear inside an explicit exact object type.",
   ),
-  InexactInsideNonObject: _(
+  InexactInsideNonObject: _<"InexactInsideNonObject">(
     "Explicit inexact syntax cannot appear in class or interface definitions.",
   ),
-  InexactVariance: _("Explicit inexact syntax cannot have variance."),
-  InvalidNonTypeImportInDeclareModule: _(
+  InexactVariance: _<"InexactVariance">(
+    "Explicit inexact syntax cannot have variance.",
+  ),
+  InvalidNonTypeImportInDeclareModule: _<"InvalidNonTypeImportInDeclareModule">(
     "Imports within a `declare module` body must always be `import type` or `import typeof`.",
   ),
-  MissingTypeParamDefault: _(
+  MissingTypeParamDefault: _<"MissingTypeParamDefault">(
     "Type parameter declaration needs a default, since a preceding type parameter declaration has a default.",
   ),
-  NestedDeclareModule: _(
+  NestedDeclareModule: _<"NestedDeclareModule">(
     "`declare module` cannot be used inside another `declare module`.",
   ),
-  NestedFlowComment: _(
+  NestedFlowComment: _<"NestedFlowComment">(
     "Cannot have a flow comment inside another flow comment.",
   ),
-  PatternIsOptional: _(
+  PatternIsOptional: _<"PatternIsOptional" | "OptionalBindingPattern">(
     "A binding pattern parameter cannot be optional in an implementation signature.",
     // For consistency in TypeScript and Flow error codes
     !process.env.BABEL_8_BREAKING
       ? { reasonCode: "OptionalBindingPattern" }
       : {},
   ),
-  SetterMayNotHaveThisParam: _("A setter cannot have a `this` parameter."),
-  SpreadVariance: _("Spread properties cannot have variance."),
-  ThisParamAnnotationRequired: _(
+  SetterMayNotHaveThisParam: _<"SetterMayNotHaveThisParam">(
+    "A setter cannot have a `this` parameter.",
+  ),
+  SpreadVariance: _<"SpreadVariance">(
+    "Spread properties cannot have variance.",
+  ),
+  ThisParamAnnotationRequired: _<"ThisParamAnnotationRequired">(
     "A type annotation is required for the `this` parameter.",
   ),
-  ThisParamBannedInConstructor: _(
+  ThisParamBannedInConstructor: _<"ThisParamBannedInConstructor">(
     "Constructors cannot have a `this` parameter; constructors don't bind `this` like other functions.",
   ),
-  ThisParamMayNotBeOptional: _("The `this` parameter cannot be optional."),
-  ThisParamMustBeFirst: _(
+  ThisParamMayNotBeOptional: _<"ThisParamMayNotBeOptional">(
+    "The `this` parameter cannot be optional.",
+  ),
+  ThisParamMustBeFirst: _<"ThisParamMustBeFirst">(
     "The `this` parameter must be the first function parameter.",
   ),
-  ThisParamNoDefault: _("The `this` parameter may not have a default value."),
-  TypeBeforeInitializer: _(
+  ThisParamNoDefault: _<"ThisParamNoDefault">(
+    "The `this` parameter may not have a default value.",
+  ),
+  TypeBeforeInitializer: _<"TypeBeforeInitializer">(
     "Type annotations must come before default assignments, e.g. instead of `age = 25: number` use `age: number = 25`.",
   ),
-  TypeCastInPattern: _(
+  TypeCastInPattern: _<"TypeCastInPattern">(
     "The type cast expression is expected to be wrapped with parenthesis.",
   ),
-  UnexpectedExplicitInexactInObject: _(
+  UnexpectedExplicitInexactInObject: _<"UnexpectedExplicitInexactInObject">(
     "Explicit inexact syntax must appear at the end of an inexact object.",
   ),
-  UnexpectedReservedType: _<{| reservedType: string |}>(
-    ({ reservedType }) => `Unexpected reserved type ${reservedType}.`,
-  ),
-  UnexpectedReservedUnderscore: _(
+  UnexpectedReservedType: _<
+    "UnexpectedReservedType",
+    {| reservedType: string |},
+  >(({ reservedType }) => `Unexpected reserved type ${reservedType}.`),
+  UnexpectedReservedUnderscore: _<"UnexpectedReservedUnderscore">(
     "`_` is only allowed as a type argument to call or new.",
   ),
-  UnexpectedSpaceBetweenModuloChecks: _(
+  UnexpectedSpaceBetweenModuloChecks: _<"UnexpectedSpaceBetweenModuloChecks">(
     "Spaces between `%` and `checks` are not allowed here.",
   ),
-  UnexpectedSpreadType: _(
+  UnexpectedSpreadType: _<"UnexpectedSpreadType">(
     "Spread operator cannot appear in class or interface definitions.",
   ),
-  UnexpectedSubtractionOperand: _(
+  UnexpectedSubtractionOperand: _<"UnexpectedSubtractionOperand">(
     'Unexpected token, expected "number" or "bigint".',
   ),
-  UnexpectedTokenAfterTypeParameter: _(
+  UnexpectedTokenAfterTypeParameter: _<"UnexpectedTokenAfterTypeParameter">(
     "Expected an arrow function after this type parameter declaration.",
   ),
-  UnexpectedTypeParameterBeforeAsyncArrowFunction: _(
-    "Type parameters must come after the async keyword, e.g. instead of `<T> async () => {}`, use `async <T>() => {}`.",
-  ),
-  UnsupportedDeclareExportKind: _<{|
-    unsupportedExportKind: string,
-    suggestion: string,
-  |}>(
+  UnexpectedTypeParameterBeforeAsyncArrowFunction:
+    _<"UnexpectedTypeParameterBeforeAsyncArrowFunction">(
+      "Type parameters must come after the async keyword, e.g. instead of `<T> async () => {}`, use `async <T>() => {}`.",
+    ),
+  UnsupportedDeclareExportKind: _<
+    "UnsupportedDeclareExportKind",
+    {|
+      unsupportedExportKind: string,
+      suggestion: string,
+    |},
+  >(
     ({ unsupportedExportKind, suggestion }) =>
       `\`declare export ${unsupportedExportKind}\` is not supported. Use \`${suggestion}\` instead.`,
   ),
-  UnsupportedStatementInDeclareModule: _(
+  UnsupportedStatementInDeclareModule: _<"UnsupportedStatementInDeclareModule">(
     "Only declares and type imports are allowed inside declare module.",
   ),
-  UnterminatedFlowComment: _("Unterminated flow-comment."),
+  UnterminatedFlowComment: _<"UnterminatedFlowComment">(
+    "Unterminated flow-comment.",
+  ),
 }));
 /* eslint-disable sort-keys */
 

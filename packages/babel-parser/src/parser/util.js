@@ -18,7 +18,7 @@ import ProductionParameterHandler, {
   PARAM_AWAIT,
   PARAM,
 } from "../util/production-parameter";
-import { Errors, ParseError } from "../parse-error";
+import { Errors, ParseError, type ErrorDescription } from "../parse-error";
 /*::
 import type ScopeHandler from "../util/scope";
 */
@@ -95,13 +95,10 @@ export default class UtilParser extends Tokenizer {
 
   // Asserts that following token is given contextual keyword.
 
-  expectContextual(
-    token: TokenType,
-    ParseErrorClass?: Class<ParseError<any>>,
-  ): void {
+  expectContextual(token: TokenType, desc?: ErrorDescription<any, any>): void {
     if (!this.eatContextual(token)) {
-      if (ParseErrorClass != null) {
-        throw this.raise(ParseErrorClass, { at: this.state.startLoc });
+      if (desc != null) {
+        throw this.raise(desc, { at: this.state.startLoc });
       }
       throw this.unexpected(null, token);
     }
@@ -156,7 +153,7 @@ export default class UtilParser extends Tokenizer {
     oldState: State = this.state.clone(),
   ):
     | TryParse<T, null, false, false, null>
-    | TryParse<T | null, ParseError<any>, boolean, false, State>
+    | TryParse<T | null, ParseError<string, any>, boolean, false, State>
     | TryParse<T | null, null, false, true, State> {
     const abortSignal: { node: T | null } = { node: null };
     try {
@@ -173,7 +170,7 @@ export default class UtilParser extends Tokenizer {
         this.state.tokensLength = failState.tokensLength;
         return {
           node,
-          error: (failState.errors[oldState.errors.length]: ParseError<any>),
+          error: (failState.errors[oldState.errors.length]: ParseError<*, *>),
           thrown: false,
           aborted: false,
           failState,

@@ -20,7 +20,12 @@ import {
   type TokenType,
 } from "./types";
 import { type TokContext } from "./context";
-import { Errors, ParseError, type RaiseProperties } from "../parse-error";
+import {
+  Errors,
+  ParseError,
+  type RaiseProperties,
+  type ErrorDescription,
+} from "../parse-error";
 import {
   lineBreakG,
   isNewLine,
@@ -1748,18 +1753,18 @@ export default class Tokenizer extends CommentsParser {
    * If `errorRecovery` is `true`, the error is pushed to the errors array and
    * returned. If `errorRecovery` is `false`, the error is instead thrown.
    *
-   * @param {Class<ParseError<ErrorDetails>>>} ParseErrorClass
+   * @param {ErrorDescription<ReasonCode, ErrorDetails>} ParseErrorClass
    * @param {RaiseProperties<ErrorDetails>} raiseProperties
-   * @returns {(ParseError<ErrorDetails> | empty)}
+   * @returns {(ParseError<ReasonCode, ErrorDetails> | empty)}
    * @memberof Tokenizer
    */
-  raise<ErrorDetails, T: Class<ParseError<ErrorDetails>>>(
-    ParseErrorClass: T,
+  raise<ReasonCode: string, ErrorDetails>(
+    { reasonCode, code, toMessage }: ErrorDescription<ReasonCode, ErrorDetails>,
     raiseProperties: RaiseProperties<ErrorDetails>,
-  ): ParseError<ErrorDetails> {
+  ): ParseError<ReasonCode, ErrorDetails> {
     const { at, ...details } = raiseProperties;
     const loc = at instanceof Position ? at : at.loc.start;
-    const error = new ParseErrorClass({ loc, details });
+    const error = new ParseError({ reasonCode, code, toMessage, loc, details });
 
     if (!this.options.errorRecovery) throw error;
     if (!this.isLookahead) this.state.errors.push(error);
@@ -1773,15 +1778,16 @@ export default class Tokenizer extends CommentsParser {
    * already an error stored at the same `Position`, and replaces it with the
    * one generated here.
    *
-   * @param {Class<ParseError<ErrorDetails>>>} ParseErrorClass
+   * @param {ErrorDescription<ReasonCode, ErrorDetails>} ParseErrorClass
    * @param {RaiseProperties<ErrorDetails>} raiseProperties
-   * @returns {(ParseError<ErrorDetails> | empty)}
+   * @returns {(ParseError<ReasonCode, ErrorDetails> | empty)}
    * @memberof Tokenizer
    */
-  raiseOverwrite<ErrorDetails, T: Class<ParseError<ErrorDetails>>>(
-    ParseErrorClass: T,
+  raiseOverwrite<ReasonCode: string, ErrorDetails>(
+    desc: ErrorDescription<ReasonCode, ErrorDetails>,
     raiseProperties: RaiseProperties<ErrorDetails>,
-  ): ParseError<ErrorDetails> | empty {
+  ): ParseError<ReasonCode, ErrorDetails> | empty {
+    const { reasonCode, code, toMessage } = desc;
     const { at, ...details } = raiseProperties;
     const loc = at instanceof Position ? at : at.loc.start;
     const pos = loc.index;
@@ -1790,12 +1796,19 @@ export default class Tokenizer extends CommentsParser {
     for (let i = errors.length - 1; i >= 0; i--) {
       const error = errors[i];
       if (error.pos === pos) {
-        return (errors[i] = new ParseErrorClass({ loc, details }));
+        const newError = new ParseError({
+          reasonCode,
+          code,
+          toMessage,
+          loc,
+          details,
+        });
+        return (errors[i] = newError);
       }
       if (error.pos < pos) break;
     }
 
-    return this.raise(ParseErrorClass, raiseProperties);
+    return this.raise(desc, raiseProperties);
   }
 
   // updateContext is used by the jsx plugin

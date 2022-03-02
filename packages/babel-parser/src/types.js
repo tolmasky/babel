@@ -159,7 +159,7 @@ export type DecimalLiteral = NodeBase & {
 
 export type ParserOutput = {
   comments: $ReadOnlyArray<Comment>,
-  errors: Array<ParseError<any>>,
+  errors: Array<ParseError<string, any>>,
   tokens?: $ReadOnlyArray<Token | Comment>,
 };
 // Programs

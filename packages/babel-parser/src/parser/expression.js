@@ -255,7 +255,7 @@ export default class ExpressionParser extends LValParser {
   // the typescript and flow plugins.
   setOptionalParametersError(
     refExpressionErrors: ExpressionErrors,
-    resultError?: ParseError<any>,
+    resultError?: ParseError<string, any>,
   ) {
     refExpressionErrors.optionalParametersLoc =
       resultError?.loc ?? this.state.startLoc;

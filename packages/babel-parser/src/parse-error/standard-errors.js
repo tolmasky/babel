@@ -21,172 +21,236 @@ export type LValAncestor =
     };
 
 export default (_: typeof toParseErrorCredentials) => ({
-  AccessorIsGenerator: _<{| kind: "get" | "set" |}>(
+  AccessorIsGenerator: _<"AccessorIsGenerator", {| kind: "get" | "set" |}>(
     ({ kind }) => `A ${kind}ter cannot be a generator.`,
   ),
 
-  ArgumentsInClass: _(
+  ArgumentsInClass: _<"ArgumentsInClass">(
     "'arguments' is only allowed in functions and class methods.",
   ),
-  AsyncFunctionInSingleStatementContext: _(
-    "Async functions can only be declared at the top level or inside a block.",
-  ),
-  AwaitBindingIdentifier: _(
+  AsyncFunctionInSingleStatementContext:
+    _<"AsyncFunctionInSingleStatementContext">(
+      "Async functions can only be declared at the top level or inside a block.",
+    ),
+  AwaitBindingIdentifier: _<"AwaitBindingIdentifier">(
     "Can not use 'await' as identifier inside an async function.",
   ),
-  AwaitBindingIdentifierInStaticBlock: _(
+  AwaitBindingIdentifierInStaticBlock: _<"AwaitBindingIdentifierInStaticBlock">(
     "Can not use 'await' as identifier inside a static block.",
   ),
-  AwaitExpressionFormalParameter: _(
+  AwaitExpressionFormalParameter: _<"AwaitExpressionFormalParameter">(
     "'await' is not allowed in async function parameters.",
   ),
-  AwaitNotInAsyncContext: _(
+  AwaitNotInAsyncContext: _<"AwaitNotInAsyncContext">(
     "'await' is only allowed within async functions and at the top levels of modules.",
   ),
-  AwaitNotInAsyncFunction: _("'await' is only allowed within async functions."),
-  BadGetterArity: _("A 'get' accesor must not have any formal parameters."),
-  BadSetterArity: _("A 'set' accesor must have exactly one formal parameter."),
-  BadSetterRestParameter: _(
+  AwaitNotInAsyncFunction: _<"AwaitNotInAsyncFunction">(
+    "'await' is only allowed within async functions.",
+  ),
+  BadGetterArity: _<"BadGetterArity">(
+    "A 'get' accesor must not have any formal parameters.",
+  ),
+  BadSetterArity: _<"BadSetterArity">(
+    "A 'set' accesor must have exactly one formal parameter.",
+  ),
+  BadSetterRestParameter: _<"BadSetterRestParameter">(
     "A 'set' accesor function argument must not be a rest parameter.",
   ),
-  ConstructorClassField: _("Classes may not have a field named 'constructor'."),
-  ConstructorClassPrivateField: _(
+  ConstructorClassField: _<"ConstructorClassField">(
+    "Classes may not have a field named 'constructor'.",
+  ),
+  ConstructorClassPrivateField: _<"ConstructorClassPrivateField">(
     "Classes may not have a private field named '#constructor'.",
   ),
-  ConstructorIsAccessor: _("Class constructor may not be an accessor."),
-  ConstructorIsAsync: _("Constructor can't be an async function."),
-  ConstructorIsGenerator: _("Constructor can't be a generator."),
-  DeclarationMissingInitializer: _<{| kind: "const" | "destructuring" |}>(
-    ({ kind }) => `Missing initializer in ${kind} declaration.`,
+  ConstructorIsAccessor: _<"ConstructorIsAccessor">(
+    "Class constructor may not be an accessor.",
   ),
-  DecoratorBeforeExport: _(
+  ConstructorIsAsync: _<"ConstructorIsAsync">(
+    "Constructor can't be an async function.",
+  ),
+  ConstructorIsGenerator: _<"ConstructorIsGenerator">(
+    "Constructor can't be a generator.",
+  ),
+  DeclarationMissingInitializer: _<
+    "DeclarationMissingInitializer",
+    {| kind: "const" | "destructuring" |},
+  >(({ kind }) => `Missing initializer in ${kind} declaration.`),
+  DecoratorBeforeExport: _<"DecoratorBeforeExport">(
     "Decorators must be placed *before* the 'export' keyword. You can set the 'decoratorsBeforeExport' option to false to use the 'export @decorator class {}' syntax.",
   ),
-  DecoratorConstructor: _(
+  DecoratorConstructor: _<"DecoratorConstructor">(
     "Decorators can't be used with a constructor. Did you mean '@dec class { ... }'?",
   ),
-  DecoratorExportClass: _(
+  DecoratorExportClass: _<"DecoratorExportClass">(
     "Using the export keyword between a decorator and a class is not allowed. Please use `export @dec class` instead.",
   ),
-  DecoratorSemicolon: _("Decorators must not be followed by a semicolon."),
-  DecoratorStaticBlock: _("Decorators can't be used with a static block."),
-  DeletePrivateField: _("Deleting a private field is not allowed."),
-  DestructureNamedImport: _(
+  DecoratorSemicolon: _<"DecoratorSemicolon">(
+    "Decorators must not be followed by a semicolon.",
+  ),
+  DecoratorStaticBlock: _<"DecoratorStaticBlock">(
+    "Decorators can't be used with a static block.",
+  ),
+  DeletePrivateField: _<"DeletePrivateField">(
+    "Deleting a private field is not allowed.",
+  ),
+  DestructureNamedImport: _<"DestructureNamedImport">(
     "ES2015 named imports do not destructure. Use another statement for destructuring after the import.",
   ),
-  DuplicateConstructor: _("Duplicate constructor in the same class."),
-  DuplicateDefaultExport: _("Only one default export allowed per module."),
-  DuplicateExport: _<{| exportName: string |}>(
+  DuplicateConstructor: _<"DuplicateConstructor">(
+    "Duplicate constructor in the same class.",
+  ),
+  DuplicateDefaultExport: _<"DuplicateDefaultExport">(
+    "Only one default export allowed per module.",
+  ),
+  DuplicateExport: _<"DuplicateExport", {| exportName: string |}>(
     ({ exportName }) =>
       `\`${exportName}\` has already been exported. Exported identifiers must be unique.`,
   ),
-  DuplicateProto: _("Redefinition of __proto__ property."),
-  DuplicateRegExpFlags: _("Duplicate regular expression flag."),
-  ElementAfterRest: _("Rest element must be last element."),
-  EscapedCharNotAnIdentifier: _("Invalid Unicode escape."),
-  ExportBindingIsString: _<{| localName: string, exportName: string |}>(
+  DuplicateProto: _<"DuplicateProto">("Redefinition of __proto__ property."),
+  DuplicateRegExpFlags: _<"DuplicateRegExpFlags">(
+    "Duplicate regular expression flag.",
+  ),
+  ElementAfterRest: _<"ElementAfterRest">("Rest element must be last element."),
+  EscapedCharNotAnIdentifier: _<"EscapedCharNotAnIdentifier">(
+    "Invalid Unicode escape.",
+  ),
+  ExportBindingIsString: _<
+    "ExportBindingIsString",
+    {| localName: string, exportName: string |},
+  >(
     ({ localName, exportName }) =>
       `A string literal cannot be used as an exported binding without \`from\`.\n- Did you mean \`export { '${localName}' as '${exportName}' } from 'some-module'\`?`,
   ),
-  ExportDefaultFromAsIdentifier: _(
+  ExportDefaultFromAsIdentifier: _<"ExportDefaultFromAsIdentifier">(
     "'from' is not allowed as an identifier after 'export default'.",
   ),
 
-  ForInOfLoopInitializer: _<{| type: "ForInStatement" | "ForOfStatement" |}>(
+  ForInOfLoopInitializer: _<
+    "ForInOfLoopInitializer",
+    {| type: "ForInStatement" | "ForOfStatement" |},
+  >(
     ({ type }) =>
       `'${
         type === "ForInStatement" ? "for-in" : "for-of"
       }' loop variable declaration may not have an initializer.`,
   ),
 
-  ForOfAsync: _("The left-hand side of a for-of loop may not be 'async'."),
-  ForOfLet: _("The left-hand side of a for-of loop may not start with 'let'."),
-  GeneratorInSingleStatementContext: _(
+  ForOfAsync: _<"ForOfAsync">(
+    "The left-hand side of a for-of loop may not be 'async'.",
+  ),
+  ForOfLet: _<"ForOfLet">(
+    "The left-hand side of a for-of loop may not start with 'let'.",
+  ),
+  GeneratorInSingleStatementContext: _<"GeneratorInSingleStatementContext">(
     "Generators can only be declared at the top level or inside a block.",
   ),
 
-  IllegalBreakContinue: _<{| type: "BreakStatement" | "ContinueStatement" |}>(
+  IllegalBreakContinue: _<
+    "IllegalBreakContinue",
+    {| type: "BreakStatement" | "ContinueStatement" |},
+  >(
     ({ type }) =>
       `Unsyntactic ${type === "BreakStatement" ? "break" : "continue"}.`,
   ),
 
-  IllegalLanguageModeDirective: _(
+  IllegalLanguageModeDirective: _<"IllegalLanguageModeDirective">(
     "Illegal 'use strict' directive in function with non-simple parameter list.",
   ),
-  IllegalReturn: _("'return' outside of function."),
-  ImportBindingIsString: _<{| importName: string |}>(
+  IllegalReturn: _<"IllegalReturn">("'return' outside of function."),
+  ImportBindingIsString: _<"ImportBindingIsString", {| importName: string |}>(
     ({ importName }) =>
       `A string literal cannot be used as an imported binding.\n- Did you mean \`import { "${importName}" as foo }\`?`,
   ),
-  ImportCallArgumentTrailingComma: _(
+  ImportCallArgumentTrailingComma: _<"ImportCallArgumentTrailingComma">(
     "Trailing comma is disallowed inside import(...) arguments.",
   ),
-  ImportCallArity: _<{| maxArgumentCount: 1 | 2 |}>(
+  ImportCallArity: _<"ImportCallArity", {| maxArgumentCount: 1 | 2 |}>(
     ({ maxArgumentCount }) =>
       `\`import()\` requires exactly ${
         maxArgumentCount === 1 ? "one argument" : "one or two arguments"
       }.`,
   ),
-  ImportCallNotNewExpression: _("Cannot use new with import(...)."),
-  ImportCallSpreadArgument: _("`...` is not allowed in `import()`."),
-  IncompatibleRegExpUVFlags: _(
+  ImportCallNotNewExpression: _<"ImportCallNotNewExpression">(
+    "Cannot use new with import(...).",
+  ),
+  ImportCallSpreadArgument: _<"ImportCallSpreadArgument">(
+    "`...` is not allowed in `import()`.",
+  ),
+  IncompatibleRegExpUVFlags: _<"IncompatibleRegExpUVFlags">(
     "The 'u' and 'v' regular expression flags cannot be enabled at the same time.",
   ),
-  InvalidBigIntLiteral: _("Invalid BigIntLiteral."),
-  InvalidCodePoint: _("Code point out of bounds."),
-  InvalidCoverInitializedName: _("Invalid shorthand property initializer."),
-  InvalidDecimal: _("Invalid decimal."),
-  InvalidDigit: _<{| radix: number |}>(
+  InvalidBigIntLiteral: _<"InvalidBigIntLiteral">("Invalid BigIntLiteral."),
+  InvalidCodePoint: _<"InvalidCodePoint">("Code point out of bounds."),
+  InvalidCoverInitializedName: _<"InvalidCoverInitializedName">(
+    "Invalid shorthand property initializer.",
+  ),
+  InvalidDecimal: _<"InvalidDecimal">("Invalid decimal."),
+  InvalidDigit: _<"InvalidDigit", {| radix: number |}>(
     ({ radix }) => `Expected number in radix ${radix}.`,
   ),
-  InvalidEscapeSequence: _("Bad character escape sequence."),
-  InvalidEscapeSequenceTemplate: _("Invalid escape sequence in template."),
-  InvalidEscapedReservedWord: _<{| reservedWord: string |}>(
-    ({ reservedWord }) => `Escape sequence in keyword ${reservedWord}.`,
+  InvalidEscapeSequence: _<"InvalidEscapeSequence">(
+    "Bad character escape sequence.",
   ),
-  InvalidIdentifier: _<{| identifierName: string |}>(
+  InvalidEscapeSequenceTemplate: _<"InvalidEscapeSequenceTemplate">(
+    "Invalid escape sequence in template.",
+  ),
+  InvalidEscapedReservedWord: _<
+    "InvalidEscapedReservedWord",
+    {| reservedWord: string |},
+  >(({ reservedWord }) => `Escape sequence in keyword ${reservedWord}.`),
+  InvalidIdentifier: _<"InvalidIdentifier", {| identifierName: string |}>(
     ({ identifierName }) => `Invalid identifier ${identifierName}.`,
   ),
-  InvalidLhs: _<{| ancestor: LValAncestor |}>(
+  InvalidLhs: _<"InvalidLhs", {| ancestor: LValAncestor |}>(
     ({ ancestor }) =>
       `Invalid left-hand side in ${toNodeDescription(ancestor)}.`,
   ),
-  InvalidLhsBinding: _<{| ancestor: LValAncestor |}>(
+  InvalidLhsBinding: _<"InvalidLhsBinding", {| ancestor: LValAncestor |}>(
     ({ ancestor }) =>
       `Binding invalid left-hand side in ${toNodeDescription(ancestor)}.`,
   ),
-  InvalidNumber: _("Invalid number."),
-  InvalidOrMissingExponent: _(
+  InvalidNumber: _<"InvalidNumber">("Invalid number."),
+  InvalidOrMissingExponent: _<"InvalidOrMissingExponent">(
     "Floating-point numbers require a valid exponent after the 'e'.",
   ),
-  InvalidOrUnexpectedToken: _<{| unexpected: string |}>(
-    ({ unexpected }) => `Unexpected character '${unexpected}'.`,
-  ),
-  InvalidParenthesizedAssignment: _(
+  InvalidOrUnexpectedToken: _<
+    "InvalidOrUnexpectedToken",
+    {| unexpected: string |},
+  >(({ unexpected }) => `Unexpected character '${unexpected}'.`),
+  InvalidParenthesizedAssignment: _<"InvalidParenthesizedAssignment">(
     "Invalid parenthesized assignment pattern.",
   ),
-  InvalidPrivateFieldResolution: _<{| identifierName: string |}>(
-    ({ identifierName }) => `Private name #${identifierName} is not defined.`,
+  InvalidPrivateFieldResolution: _<
+    "InvalidPrivateFieldResolution",
+    {| identifierName: string |},
+  >(({ identifierName }) => `Private name #${identifierName} is not defined.`),
+  InvalidPropertyBindingPattern: _<"InvalidPropertyBindingPattern">(
+    "Binding member expression.",
   ),
-  InvalidPropertyBindingPattern: _("Binding member expression."),
-  InvalidRecordProperty: _(
+  InvalidRecordProperty: _<"InvalidRecordProperty">(
     "Only properties and spread elements are allowed in record definitions.",
   ),
-  InvalidRestAssignmentPattern: _("Invalid rest operator's argument."),
-  LabelRedeclaration: _<{| labelName: string |}>(
+  InvalidRestAssignmentPattern: _<"InvalidRestAssignmentPattern">(
+    "Invalid rest operator's argument.",
+  ),
+  LabelRedeclaration: _<"LabelRedeclaration", {| labelName: string |}>(
     ({ labelName }) => `Label '${labelName}' is already declared.`,
   ),
-  LetInLexicalBinding: _(
+  LetInLexicalBinding: _<"LetInLexicalBinding">(
     "'let' is not allowed to be used as a name in 'let' or 'const' declarations.",
   ),
-  LineTerminatorBeforeArrow: _("No line break is allowed before '=>'."),
-  MalformedRegExpFlags: _("Invalid regular expression flag."),
-  MissingClassName: _("A class name is required."),
-  MissingEqInAssignment: _(
+  LineTerminatorBeforeArrow: _<"LineTerminatorBeforeArrow">(
+    "No line break is allowed before '=>'.",
+  ),
+  MalformedRegExpFlags: _<"MalformedRegExpFlags">(
+    "Invalid regular expression flag.",
+  ),
+  MissingClassName: _<"MissingClassName">("A class name is required."),
+  MissingEqInAssignment: _<"MissingEqInAssignment">(
     "Only '=' operator can be used for specifying default value.",
   ),
-  MissingSemicolon: _("Missing semicolon."),
-  MissingPlugin: _<{| missingPlugin: [string] |}>(
+  MissingSemicolon: _<"MissingSemicolon">("Missing semicolon."),
+  MissingPlugin: _<"MissingPlugin", {| missingPlugin: [string] |}>(
     ({ missingPlugin }) =>
       `This experimental syntax requires enabling the parser plugin: ${missingPlugin
         .map(name => JSON.stringify(name))
@@ -194,171 +258,221 @@ export default (_: typeof toParseErrorCredentials) => ({
   ),
   // FIXME: Would be nice to make this "missingPlugins" instead.
   // Also), seems like we can drop the "(s)" from the message and just make it "s".
-  MissingOneOfPlugins: _<{| missingPlugin: string[] |}>(
+  MissingOneOfPlugins: _<"MissingOneOfPlugins", {| missingPlugin: string[] |}>(
     ({ missingPlugin }) =>
       `This experimental syntax requires enabling one of the following parser plugin(s): ${missingPlugin
         .map(name => JSON.stringify(name))
         .join(", ")}.`,
   ),
-  MissingUnicodeEscape: _("Expecting Unicode escape sequence \\uXXXX."),
-  MixingCoalesceWithLogical: _(
+  MissingUnicodeEscape: _<"MissingUnicodeEscape">(
+    "Expecting Unicode escape sequence \\uXXXX.",
+  ),
+  MixingCoalesceWithLogical: _<"MixingCoalesceWithLogical">(
     "Nullish coalescing operator(??) requires parens when mixing with logical operators.",
   ),
-  ModuleAttributeDifferentFromType: _(
+  ModuleAttributeDifferentFromType: _<"ModuleAttributeDifferentFromType">(
     "The only accepted module attribute is `type`.",
   ),
-  ModuleAttributeInvalidValue: _(
+  ModuleAttributeInvalidValue: _<"ModuleAttributeInvalidValue">(
     "Only string literals are allowed as module attribute values.",
   ),
-  ModuleAttributesWithDuplicateKeys: _<{| key: string |}>(
-    ({ key }) => `Duplicate key "${key}" is not allowed in module attributes.`,
-  ),
-  ModuleExportNameHasLoneSurrogate: _<{| surrogateCharCode: number |}>(
+  ModuleAttributesWithDuplicateKeys: _<
+    "ModuleAttributesWithDuplicateKeys",
+    {| key: string |},
+  >(({ key }) => `Duplicate key "${key}" is not allowed in module attributes.`),
+  ModuleExportNameHasLoneSurrogate: _<
+    "ModuleExportNameHasLoneSurrogate",
+    {| surrogateCharCode: number |},
+  >(
     ({ surrogateCharCode }) =>
       `An export name cannot include a lone surrogate, found '\\u${surrogateCharCode.toString(
         16,
       )}'.`,
   ),
-  ModuleExportUndefined: _<{| localName: string |}>(
+  ModuleExportUndefined: _<"ModuleExportUndefined", {| localName: string |}>(
     ({ localName }) => `Export '${localName}' is not defined.`,
   ),
-  MultipleDefaultsInSwitch: _("Multiple default clauses."),
-  NewlineAfterThrow: _("Illegal newline after throw."),
-  NoCatchOrFinally: _("Missing catch or finally clause."),
-  NumberIdentifier: _("Identifier directly after number."),
-  NumericSeparatorInEscapeSequence: _(
+  MultipleDefaultsInSwitch: _<"MultipleDefaultsInSwitch">(
+    "Multiple default clauses.",
+  ),
+  NewlineAfterThrow: _<"NewlineAfterThrow">("Illegal newline after throw."),
+  NoCatchOrFinally: _<"NoCatchOrFinally">("Missing catch or finally clause."),
+  NumberIdentifier: _<"NumberIdentifier">("Identifier directly after number."),
+  NumericSeparatorInEscapeSequence: _<"NumericSeparatorInEscapeSequence">(
     "Numeric separators are not allowed inside unicode escape sequences or hex escape sequences.",
   ),
-  ObsoleteAwaitStar: _(
+  ObsoleteAwaitStar: _<"ObsoleteAwaitStar">(
     "'await*' has been removed from the async functions proposal. Use Promise.all() instead.",
   ),
-  OptionalChainingNoNew: _(
+  OptionalChainingNoNew: _<"OptionalChainingNoNew">(
     "Constructors in/after an Optional Chain are not allowed.",
   ),
-  OptionalChainingNoTemplate: _(
+  OptionalChainingNoTemplate: _<"OptionalChainingNoTemplate">(
     "Tagged Template Literals are not allowed in optionalChain.",
   ),
-  OverrideOnConstructor: _(
+  OverrideOnConstructor: _<"OverrideOnConstructor">(
     "'override' modifier cannot appear on a constructor declaration.",
   ),
-  ParamDupe: _("Argument name clash."),
-  PatternHasAccessor: _("Object pattern can't contain getter or setter."),
-  PatternHasMethod: _("Object pattern can't contain methods."),
-  PrivateInExpectedIn: _<{| identifierName: string |}>(
+  ParamDupe: _<"ParamDupe">("Argument name clash."),
+  PatternHasAccessor: _<"PatternHasAccessor">(
+    "Object pattern can't contain getter or setter.",
+  ),
+  PatternHasMethod: _<"PatternHasMethod">(
+    "Object pattern can't contain methods.",
+  ),
+  PrivateInExpectedIn: _<"PrivateInExpectedIn", {| identifierName: string |}>(
     ({ identifierName }) =>
       `Private names are only allowed in property accesses (\`obj.#${identifierName}\`) or in \`in\` expressions (\`#${identifierName} in obj\`).`,
   ),
-  PrivateNameRedeclaration: _<{| identifierName: string |}>(
-    ({ identifierName }) => `Duplicate private name #${identifierName}.`,
+  PrivateNameRedeclaration: _<
+    "PrivateNameRedeclaration",
+    {| identifierName: string |},
+  >(({ identifierName }) => `Duplicate private name #${identifierName}.`),
+  RecordExpressionBarIncorrectEndSyntaxType:
+    _<"RecordExpressionBarIncorrectEndSyntaxType">(
+      "Record expressions ending with '|}' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'bar'.",
+    ),
+  RecordExpressionBarIncorrectStartSyntaxType:
+    _<"RecordExpressionBarIncorrectStartSyntaxType">(
+      "Record expressions starting with '{|' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'bar'.",
+    ),
+  RecordExpressionHashIncorrectStartSyntaxType:
+    _<"RecordExpressionHashIncorrectStartSyntaxType">(
+      "Record expressions starting with '#{' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'hash'.",
+    ),
+  RecordNoProto: _<"RecordNoProto">(
+    "'__proto__' is not allowed in Record expressions.",
   ),
-  RecordExpressionBarIncorrectEndSyntaxType: _(
-    "Record expressions ending with '|}' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'bar'.",
+  RestTrailingComma: _<"RestTrailingComma">(
+    "Unexpected trailing comma after rest element.",
   ),
-  RecordExpressionBarIncorrectStartSyntaxType: _(
-    "Record expressions starting with '{|' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'bar'.",
-  ),
-  RecordExpressionHashIncorrectStartSyntaxType: _(
-    "Record expressions starting with '#{' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'hash'.",
-  ),
-  RecordNoProto: _("'__proto__' is not allowed in Record expressions."),
-  RestTrailingComma: _("Unexpected trailing comma after rest element."),
-  SloppyFunction: _(
+  SloppyFunction: _<"SloppyFunction">(
     "In non-strict mode code, functions can only be declared at top level, inside a block, or as the body of an if statement.",
   ),
-  StaticPrototype: _("Classes may not have static property named prototype."),
-  SuperNotAllowed: _(
+  StaticPrototype: _<"StaticPrototype">(
+    "Classes may not have static property named prototype.",
+  ),
+  SuperNotAllowed: _<"SuperNotAllowed">(
     "`super()` is only valid inside a class constructor of a subclass. Maybe a typo in the method name ('constructor') or not extending another class?",
   ),
-  SuperPrivateField: _("Private fields can't be accessed on super."),
-  TrailingDecorator: _("Decorators must be attached to a class element."),
-  TupleExpressionBarIncorrectEndSyntaxType: _(
-    "Tuple expressions ending with '|]' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'bar'.",
+  SuperPrivateField: _<"SuperPrivateField">(
+    "Private fields can't be accessed on super.",
   ),
-  TupleExpressionBarIncorrectStartSyntaxType: _(
-    "Tuple expressions starting with '[|' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'bar'.",
+  TrailingDecorator: _<"TrailingDecorator">(
+    "Decorators must be attached to a class element.",
   ),
-  TupleExpressionHashIncorrectStartSyntaxType: _(
-    "Tuple expressions starting with '#[' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'hash'.",
+  TupleExpressionBarIncorrectEndSyntaxType:
+    _<"TupleExpressionBarIncorrectEndSyntaxType">(
+      "Tuple expressions ending with '|]' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'bar'.",
+    ),
+  TupleExpressionBarIncorrectStartSyntaxType:
+    _<"TupleExpressionBarIncorrectStartSyntaxType">(
+      "Tuple expressions starting with '[|' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'bar'.",
+    ),
+  TupleExpressionHashIncorrectStartSyntaxType:
+    _<"TupleExpressionHashIncorrectStartSyntaxType">(
+      "Tuple expressions starting with '#[' are only allowed when the 'syntaxType' option of the 'recordAndTuple' plugin is set to 'hash'.",
+    ),
+  UnexpectedArgumentPlaceholder: _<"UnexpectedArgumentPlaceholder">(
+    "Unexpected argument placeholder.",
   ),
-  UnexpectedArgumentPlaceholder: _("Unexpected argument placeholder."),
-  UnexpectedAwaitAfterPipelineBody: _(
+  UnexpectedAwaitAfterPipelineBody: _<"UnexpectedAwaitAfterPipelineBody">(
     'Unexpected "await" after pipeline body; await must have parentheses in minimal proposal.',
   ),
-  UnexpectedDigitAfterHash: _("Unexpected digit after hash token."),
-  UnexpectedImportExport: _(
+  UnexpectedDigitAfterHash: _<"UnexpectedDigitAfterHash">(
+    "Unexpected digit after hash token.",
+  ),
+  UnexpectedImportExport: _<"UnexpectedImportExport">(
     "'import' and 'export' may only appear at the top level.",
   ),
-  UnexpectedKeyword: _<{| keyword: string |}>(
+  UnexpectedKeyword: _<"UnexpectedKeyword", {| keyword: string |}>(
     ({ keyword }) => `Unexpected keyword '${keyword}'.`,
   ),
-  UnexpectedLeadingDecorator: _(
+  UnexpectedLeadingDecorator: _<"UnexpectedLeadingDecorator">(
     "Leading decorators must be attached to a class declaration.",
   ),
-  UnexpectedLexicalDeclaration: _(
+  UnexpectedLexicalDeclaration: _<"UnexpectedLexicalDeclaration">(
     "Lexical declaration cannot appear in a single-statement context.",
   ),
-  UnexpectedNewTarget: _(
+  UnexpectedNewTarget: _<"UnexpectedNewTarget">(
     "`new.target` can only be used in functions or class properties.",
   ),
-  UnexpectedNumericSeparator: _(
+  UnexpectedNumericSeparator: _<"UnexpectedNumericSeparator">(
     "A numeric separator is only allowed between two digits.",
   ),
-  UnexpectedPrivateField: _("Unexpected private name."),
-  UnexpectedReservedWord: _<{| reservedWord: string |}>(
-    ({ reservedWord }) => `Unexpected reserved word '${reservedWord}'.`,
+  UnexpectedPrivateField: _<"UnexpectedPrivateField">(
+    "Unexpected private name.",
   ),
-  UnexpectedSuper: _("'super' is only allowed in object methods and classes."),
-  UnexpectedToken: _<{|
-    expected?: ?string,
-    unexpected?: ?string,
-  |}>(
+  UnexpectedReservedWord: _<
+    "UnexpectedReservedWord",
+    {| reservedWord: string |},
+  >(({ reservedWord }) => `Unexpected reserved word '${reservedWord}'.`),
+  UnexpectedSuper: _<"UnexpectedSuper">(
+    "'super' is only allowed in object methods and classes.",
+  ),
+  UnexpectedToken: _<
+    *,
+    {|
+      expected?: ?string,
+      unexpected?: ?string,
+    |},
+  >(
     ({ expected, unexpected }) =>
       `Unexpected token${unexpected ? ` '${unexpected}'.` : ""}${
         expected ? `, expected "${expected}"` : ""
       }`,
   ),
-  UnexpectedTokenUnaryExponentiation: _(
+  UnexpectedTokenUnaryExponentiation: _<"UnexpectedTokenUnaryExponentiation">(
     "Illegal expression. Wrap left hand side or entire exponentiation in parentheses.",
   ),
-  UnsupportedBind: _("Binding should be performed on object property."),
-  UnsupportedDecoratorExport: _(
+  UnsupportedBind: _<"UnsupportedBind">(
+    "Binding should be performed on object property.",
+  ),
+  UnsupportedDecoratorExport: _<"UnsupportedDecoratorExport">(
     "A decorated export must export a class declaration.",
   ),
-  UnsupportedDefaultExport: _(
+  UnsupportedDefaultExport: _<"UnsupportedDefaultExport">(
     "Only expressions, functions or classes are allowed as the `default` export.",
   ),
-  UnsupportedImport: _(
+  UnsupportedImport: _<"UnsupportedImport">(
     "`import` can only be used in `import()` or `import.meta`.",
   ),
-  UnsupportedMetaProperty: _<{|
-    target: string,
-    onlyValidPropertyName: string,
-  |}>(
+  UnsupportedMetaProperty: _<
+    *,
+    {|
+      target: string,
+      onlyValidPropertyName: string,
+    |},
+  >(
     ({ target, onlyValidPropertyName }) =>
       `The only valid meta property for ${target} is ${target}.${onlyValidPropertyName}.`,
   ),
-  UnsupportedParameterDecorator: _(
+  UnsupportedParameterDecorator: _<"UnsupportedParameterDecorator">(
     "Decorators cannot be used to decorate parameters.",
   ),
-  UnsupportedPropertyDecorator: _(
+  UnsupportedPropertyDecorator: _<"UnsupportedPropertyDecorator">(
     "Decorators cannot be used to decorate object literal properties.",
   ),
-  UnsupportedSuper: _(
+  UnsupportedSuper: _<"UnsupportedSuper">(
     "'super' can only be used with function calls (i.e. super()) or in property accesses (i.e. super.prop or super[prop]).",
   ),
-  UnterminatedComment: _("Unterminated comment."),
-  UnterminatedRegExp: _("Unterminated regular expression."),
-  UnterminatedString: _("Unterminated string constant."),
-  UnterminatedTemplate: _("Unterminated template."),
-  VarRedeclaration: _<{| identifierName: string |}>(
+  UnterminatedComment: _<"UnterminatedComment">("Unterminated comment."),
+  UnterminatedRegExp: _<"UnterminatedRegExp">(
+    "Unterminated regular expression.",
+  ),
+  UnterminatedString: _<"UnterminatedString">("Unterminated string constant."),
+  UnterminatedTemplate: _<"UnterminatedTemplate">("Unterminated template."),
+  VarRedeclaration: _<"VarRedeclaration", {| identifierName: string |}>(
     ({ identifierName }) =>
       `Identifier '${identifierName}' has already been declared.`,
   ),
-  YieldBindingIdentifier: _(
+  YieldBindingIdentifier: _<"YieldBindingIdentifier">(
     "Can not use 'yield' as identifier inside a generator.",
   ),
-  YieldInParameter: _("Yield expression is not allowed in formal parameters."),
-  ZeroDigitNumericSeparator: _(
+  YieldInParameter: _<"YieldInParameter">(
+    "Yield expression is not allowed in formal parameters.",
+  ),
+  ZeroDigitNumericSeparator: _<"ZeroDigitNumericSeparator">(
     "Numeric separator can not be used after leading 0.",
   ),
 });
