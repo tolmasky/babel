@@ -49,7 +49,7 @@ export default class State {
     this.startLoc = this.endLoc = new Position(startLine, startColumn, 0);
   }
 
-  errors: ParseError<any>[] = [];
+  errors: ParseError<string, any>[] = [];
 
   // Used to signify the start of a potential arrow function
   potentialArrowAt: number = -1;
